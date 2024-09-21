@@ -19,17 +19,29 @@
             {{ building?.qrUuid }}
         </p>
 
-        <p *ngFor="let plot of buildingPlots" [ngClass]="{'text-red-500': plot.overlapPercentage < 35}" class="text-red-500">
-            Plot: {{ plot.plotId }} overlapt Percentage: {{ round(plot.overlapPercentage) }} %
+        <div *ngIf="!building.qrUuid" class="font-semibold text-xl">
+            Building Qr Not Mapped
+        </div>
+
+        <p
+            *ngFor="let plot of buildingPlots"
+            [ngClass]="{ 'text-red-500': plot.overlapPercentage < 35 }"
+            class="text-red-500"
+        >
+            Plot: {{ plot.plotId }} overlapt Percentage:
+            {{ round(plot.overlapPercentage) }} %
             <p-button
                 severity="danger"
+                size="small"
                 label="Decouple Building from Plot"
-                (click)="decoupleBuilding(buildingId,plot.plotId)"
+                (click)="decoupleBuilding(buildingId, plot.plotId)"
             ></p-button>
-            <p-button *ngIf="plot.overlapPercentage < 35"
+            <p-button
+                *ngIf="plot.overlapPercentage < 35"
                 class="ml-4"
+                size="small"
                 label="Couple Building to Plot"
-                (click)="assignBuildingToPlot(buildingId,plot.plotId)"
+                (click)="assignBuildingToPlot(buildingId, plot.plotId)"
             ></p-button>
         </p>
     </div>
@@ -44,26 +56,31 @@
                 severity="danger"
                 icon="pi pi-trash"
                 class="mr-4"
+                size="small"
                 (click)="confirm2($event)"
             ></p-button>
             <p-button
+                size="small"
                 label="View Details"
                 class="mr-4"
                 (click)="goToBuildingDetailedView(buildingId)"
             ></p-button>
             <p-button
+                size="small"
                 *ngIf="!isBuildingPoint || showZhicharPoints"
                 label="Show Zhichar Points"
                 class="mr-4"
                 (click)="showBuildingsNearBy()"
             ></p-button>
             <p-button
+                size="small"
                 *ngIf="isBuildingPoint"
                 label="Clear Zhichar Points"
                 class="mr-4"
                 (click)="clearBuildingNearBy()"
             ></p-button>
             <p-button
+                size="small"
                 *ngIf="showRedrawBuildings"
                 class="mr-4"
                 label="Redraw Building"
@@ -72,6 +89,7 @@
             <p-button
                 severity="danger"
                 class="mr-4"
+                size="small"
                 label="Delete Geometry"
                 (click)="deleteGeometry()"
             ></p-button>

@@ -18,6 +18,7 @@ import { AdminBuildingInventoryViewBuildingComponent } from './admin-building-in
 import { Router } from '@angular/router';
 import { AdminMasterBuildingComponent } from '../admin-master-building/admin-master-building.component';
 import { GeomEditType } from 'src/app/core/constants';
+import { BuildingGeometryDataService } from 'src/app/core/services/geometry/building.geometry.dataservice';
 
 interface BuildingPoint {
     lat: number;
@@ -61,10 +62,11 @@ export class AdminBuildingInventoryComponent implements OnInit {
     constructor(
         private locationDataService: LocationDataService,
         private geometryDataService: GeometryDataService,
+        private buildingGeometryDataService: BuildingGeometryDataService,
         public dialogService: DialogService,
         private router: Router,
         private messageService: MessageService
-    ) { }
+    ) {}
 
     ref: DynamicDialogRef | undefined;
 
@@ -199,8 +201,8 @@ export class AdminBuildingInventoryComponent implements OnInit {
                             },
                         }).addTo(this.map);
 
-                        this.geometryDataService
-                            .GetBuildingFootprintsBySubAdministrativeBoundary(
+                        this.buildingGeometryDataService
+                            .GetBuildingFootprintsBySubAdminZone(
                                 this.selectedSubAdministrativeZone.id
                             )
                             .subscribe((res: any) => {
@@ -216,9 +218,16 @@ export class AdminBuildingInventoryComponent implements OnInit {
                                     onEachFeature: (feature, layer) => {
                                         layer.on({
                                             click: (e: any) => {
-                                                console.log("lskdjf;alksjdflkj", feature)
+                                                console.log(
+                                                    'ONLCICK BUILDING',
+                                                    feature.properties
+                                                );
                                                 this.saveMapState();
-                                                this.showBuilding(feature.properties.buildingid, feature.properties.id_0);
+                                                this.showBuilding(
+                                                    feature.properties
+                                                        .buildingId,
+                                                    feature.properties.id
+                                                );
                                             },
                                         });
                                     },
@@ -230,18 +239,15 @@ export class AdminBuildingInventoryComponent implements OnInit {
             });
     }
     showAddBuilding(plotId, dzongkhagId, subadmId) {
-        this.ref = this.dialogService.open(
-            AdminMasterBuildingComponent,
-            {
-                header: 'Building Menu for plot: ' + plotId,
-                data: {
-                    type: GeomEditType.ADD,
-                    plotId: plotId,
-                },
-                width: '90%',
-                height: '90%',
-            }
-        );
+        this.ref = this.dialogService.open(AdminMasterBuildingComponent, {
+            header: 'Building Menu for plot: ' + plotId,
+            data: {
+                type: GeomEditType.ADD,
+                plotId: plotId,
+            },
+            width: '90%',
+            height: '90%',
+        });
 
         this.ref.onClose.subscribe((res) => {
             console.log('Add building dialog close', res);
@@ -306,6 +312,16 @@ export class AdminBuildingInventoryComponent implements OnInit {
     }
 
     showBuilding(buildingId: number, geomId: number) {
+        console.log({
+            header: 'Building ID: ' + buildingId,
+            data: {
+                buildingId: buildingId,
+                geomId: geomId,
+                showZhicharPoints: false,
+                showRedrawBuilding: false,
+            },
+            width: 'max-content',
+        });
         this.ref = this.dialogService.open(
             AdminBuildingInventoryViewBuildingComponent,
             {
@@ -334,7 +350,7 @@ export class AdminBuildingInventoryComponent implements OnInit {
         localStorage.setItem('mapState', JSON.stringify(mapState));
     }
 
-    restoreMapState() { }
+    restoreMapState() {}
 
     clearMapState() {
         localStorage.removeItem('mapState');
@@ -405,9 +421,16 @@ export class AdminBuildingInventoryComponent implements OnInit {
                                     onEachFeature: (feature, layer) => {
                                         layer.on({
                                             click: (e: any) => {
-                                                console.log("lskdjf;alksjdflkj", feature)
+                                                console.log(
+                                                    'lskdjf;alksjdflkj',
+                                                    feature
+                                                );
                                                 this.saveMapState();
-                                                this.showBuilding(feature.properties.buildingid, feature.properties.id_0);
+                                                this.showBuilding(
+                                                    feature.properties
+                                                        .buildingid,
+                                                    feature.properties.id_0
+                                                );
                                             },
                                         });
                                     },
@@ -446,9 +469,12 @@ export class AdminBuildingInventoryComponent implements OnInit {
                         // console.log(feature);
                         layer.on({
                             click: (e: any) => {
-                                console.log("lskdjf;alksjdflkj", feature)
+                                console.log('lskdjf;alksjdflkj', feature);
                                 this.saveMapState();
-                                this.showBuilding(feature.properties.buildingid, feature.properties.id_0);
+                                this.showBuilding(
+                                    feature.properties.buildingid,
+                                    feature.properties.id_0
+                                );
                             },
                         });
                     },

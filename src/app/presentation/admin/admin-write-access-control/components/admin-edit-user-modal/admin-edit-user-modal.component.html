@@ -1,0 +1,36 @@
+<form [formGroup]="updateUserForm" class="p-fluid p-2 flex flex-column gap-4">
+    <div class="flex flex-column gap-2">
+        <label for="nameEnglish">Full Name</label>
+        <input pInputText id="name" formControlName="fullName" type="text" />
+    </div>
+
+    <div class="flex flex-column gap-2">
+        <label for="nameEnglish">CID</label>
+        <input pInputText id="name" formControlName="cid" type="text" />
+    </div>
+
+    <div class="flex flex-column gap-2">
+        <label for="nameEnglish">Designation</label>
+        <input pInputText id="name" formControlName="designation" type="text" />
+    </div>
+
+    <div class="flex flex-column gap-2">
+        <label for="nameEnglish">Working Agency</label>
+        <input
+            pInputText
+            id="name"
+            formControlName="workingAgency"
+            type="text"
+        />
+    </div>
+
+    <div class="flex flex-column gap-2">
+        <label for="nameEnglish">Role</label>
+        <input pInputText id="name" formControlName="role" type="text" />
+    </div>
+
+    <div class="flex justify-content-end gap-4">
+        <p-button (click)="updateUser()" label="Update User"></p-button>
+        <p-button severity="secondary" label="Cancel"></p-button>
+    </div>
+</form>

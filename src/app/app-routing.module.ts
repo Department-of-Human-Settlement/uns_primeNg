@@ -10,12 +10,19 @@ import { AdminLayoutComponent } from './presentation/layout/admin/admin-layout.c
                     path: 'admin',
                     component: AdminLayoutComponent,
                     children: [
+                        // {
+                        //     path: '',
+                        //     loadChildren: () =>
+                        //         import(
+                        //             './presentation/admin/admin-advancedsearch/admin-advancedsearch.module'
+                        //         ).then((m) => m.AdminAdvancedsearchModule),
+                        // },
                         {
                             path: '',
                             loadChildren: () =>
                                 import(
-                                    './presentation/admin/admin-advancedsearch/admin-advancedsearch.module'
-                                ).then((m) => m.AdminAdvancedsearchModule),
+                                    './presentation/admin/admin-dashboard/admin-dashboard.module'
+                                ).then((m) => m.AdminDashboardModule),
                         },
                         {
                             path: 'building-inventory',
@@ -72,7 +79,17 @@ import { AdminLayoutComponent } from './presentation/layout/admin/admin-layout.c
                                 import(
                                     './presentation/admin/admin-master-owner/admin-master-owner.module'
                                 ).then((m) => m.AdminMasterOwnerModule),
-                        }
+                        },
+                        {
+                            path: 'write-access',
+                            loadChildren: () =>
+                                import(
+                                    './presentation/admin/admin-write-access-control/admin-write-access-contorl.routing.module'
+                                ).then(
+                                    (m) =>
+                                        m.AdminWriteAccessControlRoutingModule
+                                ),
+                        },
                     ],
                 },
 
@@ -101,4 +118,4 @@ import { AdminLayoutComponent } from './presentation/layout/admin/admin-layout.c
     ],
     exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

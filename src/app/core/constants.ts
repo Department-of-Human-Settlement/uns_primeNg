@@ -185,3 +185,8 @@ export const UnitPrimaryUses = [
     'Health',
     'Industrial',
 ];
+
+export enum BuildingGeomSourceType {
+    'SATELLITE' = 'SATELLITE',
+    'SURVEY' = 'SURVEY',
+}

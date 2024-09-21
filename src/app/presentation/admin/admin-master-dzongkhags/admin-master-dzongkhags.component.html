@@ -1,19 +1,58 @@
 <div class="col-12 flex justify-content-between align-items-center">
     <div>
-        <h3 class="font-bold">Dzongkhags Master Data</h3>
-        <p>Source GLD,DHS</p>
-    </div>
-    <div class="flex gap-2">
-        <p-button label="Download Shapefile"></p-button>
-        <p-button label="Download Excel"></p-button>
+        <h3 class="font-bold">Dzongkhags</h3>
     </div>
 </div>
-<div class="grid overflow-scroll">
-    <div class="col">
-        <div
-            class="text-center p-3 border-round-sm font-bold"
-            style="height: 70vh"
-            id="dzongkhagmap"
-        ></div>
-    </div>
-</div>
+
+<p-tabView>
+    <p-tabPanel header="Table View">
+        <p-table
+            [value]="dzongkhags"
+            [tableStyle]="{ 'min-width': '50rem' }"
+            class="p-datatable-sm"
+        >
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Name Dzongkha</th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-dzongkhag>
+                <tr>
+                    <td>{{ dzongkhag.id }}</td>
+                    <td>{{ dzongkhag.name }}</td>
+                    <td>
+                        {{
+                            dzongkhag.nameDzongkha
+                                ? dzongkhag.nameDzongkha
+                                : "NA"
+                        }}
+                    </td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button
+                                size="small"
+                                label="Edit"
+                                icon="pi pi-pencil"
+                                (click)="openUpdateDzongkhagModal(dzongkhag)"
+                            ></p-button>
+                            <p-button
+                                size="small"
+                                label="Admin Zones"
+                                icon="pi pi-eye"
+                            ></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-tabPanel>
+    <p-tabPanel header="Map View">
+        <p>
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+            accusantium...
+        </p>
+    </p-tabPanel>
+</p-tabView>

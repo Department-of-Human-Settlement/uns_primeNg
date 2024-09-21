@@ -1,0 +1,26 @@
+<form
+    [formGroup]="updateDzongkhagForm"
+    class="p-fluid p-2 flex flex-column gap-4"
+>
+    <div class="flex flex-column gap-2">
+        <label for="nameEnglish">Name(English)</label>
+        <input pInputText id="name" formControlName="name" type="text" />
+    </div>
+    <div class="flex flex-column gap-2">
+        <label for="nameDzongkha">Name(Dzongkha)</label>
+        <input
+            pInputText
+            id="nameDzongkha"
+            formControlName="nameDzongkha"
+            type="text"
+        />
+    </div>
+
+    <div class="flex justify-content-end gap-4">
+        <p-button
+            (click)="updateDzongkhag()"
+            label="Update Dzongkhag"
+        ></p-button>
+        <p-button severity="secondary" label="Cancel"></p-button>
+    </div>
+</form>

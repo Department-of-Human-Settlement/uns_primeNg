@@ -27,7 +27,7 @@ export class GeometryDataService {
     }
 
     deleteBuildingFootPrint(id: number) {
-        return this.http.delete( `${this.apiUrl}/building-footprint/${id}`);
+        return this.http.delete(`${this.apiUrl}/building-footprint/${id}`);
     }
 
     updateBuildingGeomBuildingId(buildingId: number, polygonId: number) {
@@ -105,7 +105,7 @@ export class GeometryDataService {
 
     GetBuildingFootprintById(buildingId: number) {
         return this.http.get(
-            `${this.apiUrl}/building-footprint/bid/${buildingId}`
+            `${this.apiUrl}/building-geom/building/${buildingId}`
         );
     }
 

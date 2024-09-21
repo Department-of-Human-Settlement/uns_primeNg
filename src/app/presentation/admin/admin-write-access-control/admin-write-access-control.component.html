@@ -1,0 +1,58 @@
+<p-table
+    [value]="usersWithSubAdminZoneRight"
+    [tableStyle]="{ 'min-width': '50rem' }"
+>
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>CID</th>
+            <th>Designation</th>
+            <th>Working Agency</th>
+            <th>Role</th>
+            <th></th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-user>
+        <tr>
+            <td>
+                {{ user.id }}
+            </td>
+            <td>{{ user.fullName }}</td>
+
+            <td>{{ user.cid }}</td>
+            <td>{{ user.designation }}</td>
+            <td>
+                {{ user.workingAgency }}
+            </td>
+            <td>
+                {{ user.role }}
+            </td>
+
+            <td>
+                <div class="flex gap-2">
+                    <p-button
+                        size="small"
+                        icon="pi pi-trash"
+                        (click)="deleteUser(user)"
+                        severity="secondary"
+                    ></p-button>
+                    <p-button
+                        label="Edit"
+                        size="small"
+                        icon="pi pi-pencil"
+                        severity="secondary"
+                        (click)="openUpdateUserModal(user)"
+                    ></p-button>
+                    <p-button
+                        label="SubAdmins"
+                        size="small"
+                        icon="pi pi-eye"
+                        severity="secondary"
+                        (click)="openAssignSubAdminRightsModal(user)"
+                    ></p-button>
+                </div>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>

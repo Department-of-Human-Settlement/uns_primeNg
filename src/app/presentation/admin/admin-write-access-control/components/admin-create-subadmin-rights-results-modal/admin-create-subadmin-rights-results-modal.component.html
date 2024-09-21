@@ -1,0 +1,19 @@
+<p>Mapping Results</p>
+
+<div class="flex">
+    <div class="w-6 text-red-500">
+        <p class="font-semibold">Failed</p>
+        <p *ngFor="let item of results.failedCreates">
+            -{{ item.subAdminZone.name }}({{ item.subAdminZone.location }}) -
+            {{ item.error }}
+        </p>
+        <p *ngIf="!results.failedCreates.length">No failed Mapping</p>
+    </div>
+    <div class="w-6 text-green-500">
+        <p class="font-semibold">Successful</p>
+        <p *ngFor="let item of results.successfulCreates">
+            -{{ item.subAdminZone.name }}({{ item.subAdminZone.location }})
+        </p>
+        <p *ngIf="!results.successfulCreates.length">No Successful Mapping</p>
+    </div>
+</div>

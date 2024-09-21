@@ -27,16 +27,6 @@ export class AdminMenuComponent implements OnInit {
                 label: 'Database',
                 items: [
                     {
-                        label: 'Plan Inventory',
-                        icon: 'pi pi-fw pi-th-large',
-                        routerLink: ['/plans'],
-                    },
-                    {
-                        label: 'Plots Inventory',
-                        icon: 'pi pi-fw pi-building',
-                        routerLink: ['/plots'],
-                    },
-                    {
                         label: 'Buildings Inventory',
                         icon: 'pi pi-fw pi-building',
                         routerLink: ['/admin/building-inventory'],
@@ -70,6 +60,21 @@ export class AdminMenuComponent implements OnInit {
                         label: 'Owners',
                         icon: 'pi pi-fw pi-building',
                         routerLink: ['/admin/master-owners'],
+                    },
+                ],
+            },
+            {
+                label: 'System',
+                items: [
+                    {
+                        label: 'Write Access',
+                        icon: 'pi pi-fw pi-th-large',
+                        routerLink: ['/admin/write-access'],
+                    },
+                    {
+                        label: 'Audit Logs',
+                        icon: 'pi pi-fw pi-building',
+                        routerLink: ['/admin/master-admzones'],
                     },
                 ],
             },
