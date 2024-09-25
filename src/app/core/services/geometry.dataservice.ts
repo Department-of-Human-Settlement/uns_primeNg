@@ -110,8 +110,6 @@ export class GeometryDataService {
     }
 
     GetPlotsGeomByPlotIdCsv(plotIds: string) {
-        return this.http.get(
-            `${this.apiUrl}/administrative-zone/plots/${plotIds}`
-        );
+        return this.http.get(`${this.apiUrl}/plot-geom/${plotIds}`);
     }
 }

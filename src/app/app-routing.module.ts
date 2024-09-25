@@ -10,19 +10,19 @@ import { AdminLayoutComponent } from './presentation/layout/admin/admin-layout.c
                     path: 'admin',
                     component: AdminLayoutComponent,
                     children: [
-                        // {
-                        //     path: '',
-                        //     loadChildren: () =>
-                        //         import(
-                        //             './presentation/admin/admin-advancedsearch/admin-advancedsearch.module'
-                        //         ).then((m) => m.AdminAdvancedsearchModule),
-                        // },
                         {
                             path: '',
                             loadChildren: () =>
                                 import(
                                     './presentation/admin/admin-dashboard/admin-dashboard.module'
                                 ).then((m) => m.AdminDashboardModule),
+                        },
+                        {
+                            path: 'search',
+                            loadChildren: () =>
+                                import(
+                                    './presentation/admin/admin-advancedsearch/admin-advancedsearch.module'
+                                ).then((m) => m.AdminAdvancedsearchModule),
                         },
                         {
                             path: 'building-inventory',

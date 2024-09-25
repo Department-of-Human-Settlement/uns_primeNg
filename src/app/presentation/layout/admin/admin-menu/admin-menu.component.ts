@@ -24,6 +24,16 @@ export class AdminMenuComponent implements OnInit {
                 ],
             },
             {
+                label: 'Search',
+                items: [
+                    {
+                        label: 'Search',
+                        icon: 'pi pi-fw pi-search',
+                        routerLink: ['/admin/search'],
+                    },
+                ],
+            },
+            {
                 label: 'Database',
                 items: [
                     {
