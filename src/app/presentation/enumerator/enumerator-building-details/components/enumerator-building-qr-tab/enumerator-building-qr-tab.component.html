@@ -1,0 +1,100 @@
+<p-confirmDialog></p-confirmDialog>
+<div class="flex flex-column h-screen font-anuphan">
+    <!-- QR Code Scanning Section -->
+    <div *ngIf="qrVerificationOngoing && building?.qrUuid === null">
+        <div class="text-center my-2 rounded mx-4 p-4 text-secondary-600">
+            <p class="text-xl font-bold">Scan QR Code</p>
+            <p class="text-xs text-secondary-400">
+                Scan the QR and wait for the verification results
+            </p>
+        </div>
+        <zxing-scanner
+            #scanner
+            [start]="building?.qrUuid === null"
+            [device]="currentDevice"
+            (scanSuccess)="handleQrCodeResult($event)"
+        ></zxing-scanner>
+    </div>
+
+    <!-- QR Verification Section -->
+    <div *ngIf="!qrVerificationOngoing && !building.qrUuid" class="p-6">
+        <!-- Valid QR Code -->
+        <div class="text-center" *ngIf="isQrValid">
+            <p class="text-sm text-secondary-700 my-2">
+                {{ qrVerificationResultMessage }}
+            </p>
+            <div class="flex flex-column align-items-center">
+                <qrcode
+                    [qrdata]="qrResultString"
+                    [allowEmptyString]="true"
+                    [cssClass]="'center'"
+                    [errorCorrectionLevel]="'high'"
+                    [colorDark]="'#7AADA6'"
+                    [colorLight]="'#FFFFFF00'"
+                    [elementType]="'svg'"
+                    [scale]="1"
+                    [title]="'BuildingQR'"
+                    [width]="120"
+                ></qrcode>
+                <p class="text-center text-secondary-700">
+                    {{ qrResultString }}
+                </p>
+            </div>
+            <div class="flex gap-2 text-sm">
+                <button
+                    pButton
+                    label="Map QR to Building?"
+                    class="p-button-primary w-full"
+                    (click)="confirmMapQrcode()"
+                ></button>
+                <button
+                    pButton
+                    label="Rescan"
+                    class="p-button-secondary w-full"
+                    (click)="rescan()"
+                ></button>
+            </div>
+        </div>
+
+        <!-- Invalid QR Code -->
+        <div
+            *ngIf="!isQrValid"
+            class="flex flex-column text-center align-items-center my-6"
+        >
+            <button
+                pButton
+                label="Scan another QR"
+                class="p-button-primary w-full"
+                (click)="rescan()"
+            ></button>
+        </div>
+    </div>
+
+    <!-- QR Already Mapped Section -->
+    <div class="flex flex-column align-items-center" *ngIf="building?.qrUuid">
+        <qrcode
+            [qrdata]="building.qrUuid"
+            [allowEmptyString]="true"
+            [cssClass]="'center'"
+            [errorCorrectionLevel]="'high'"
+            [colorDark]="'#7AADA6'"
+            [colorLight]="'#FFFFFF00'"
+            [elementType]="'svg'"
+            [scale]="1"
+            [title]="'Building Qr'"
+            [width]="200"
+        ></qrcode>
+        <div class="text-primary font-bold text-center p-4">
+            {{ building.buildingNumber }}
+            <p>{{ building.address }}</p>
+        </div>
+        <p>Building has been Mapped to</p>
+        <p>QR UUID: {{ building.qrUuid }}</p>
+        <button
+            pButton
+            label="Un-Map QR"
+            class="p-button-danger"
+            (click)="unMapQr()"
+        ></button>
+    </div>
+</div>

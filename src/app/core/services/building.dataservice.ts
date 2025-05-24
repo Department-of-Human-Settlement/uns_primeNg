@@ -34,6 +34,29 @@ export interface PTSRETURNDTO {
     type: string; // Type of building, e.g., "Contemporary"
     units: PTSUNITDTO[];
 }
+
+export interface BuildingImageDTO {
+    id: number;
+    buildingId: number;
+    uri: string;
+}
+
+export interface CreateBuildingImageDTO {
+    builidngId: number;
+    file: File;
+}
+
+export interface BuildingSketchDTO {
+    id: number;
+    buildingId: number;
+    uri: string;
+}
+
+export interface CreateBuildingSketchDTO {
+    buildingId: number;
+    file: File;
+}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -91,5 +114,58 @@ export class BuildingDataService {
         return this.http.get<PTSRETURNDTO[]>(`${this.apiUrl}/pts/buildings`, {
             params,
         });
+    }
+
+    CreateBuildingImage(
+        data: FormData,
+        buildingId: number
+    ): Observable<BuildingImageDTO> {
+        return this.http.post<BuildingImageDTO>(
+            `${this.apiUrl}/building-image/upload/${buildingId}`,
+            data
+        );
+    }
+    GetAllImagesByBuilding(buildingId: number): Observable<BuildingImageDTO[]> {
+        return this.http.get<BuildingImageDTO[]>(
+            `${this.apiUrl}/building-image/bid/${buildingId}`
+        );
+    }
+    DeleteBuildingImage(buildingImageId: number) {
+        return this.http.delete<BuildingImageDTO>(
+            `${this.apiUrl}/building-image/${buildingImageId}`
+        );
+    }
+
+    CreateBuildingSketch(
+        data: FormData,
+        buildingId: number
+    ): Observable<BuildingSketchDTO> {
+        return this.http.post<BuildingSketchDTO>(
+            `${this.apiUrl}/building-sketch/upload/${buildingId}`,
+            data
+        );
+    }
+    GetAllSketchesByBuilding(
+        buildingId: number
+    ): Observable<BuildingSketchDTO[]> {
+        return this.http.get<BuildingSketchDTO[]>(
+            `${this.apiUrl}/building-sketch/bid/${buildingId}`
+        );
+    }
+
+    DeleteBuildingSketch(buildingSketchId: number) {
+        return this.http.delete<BuildingSketchDTO>(
+            `${this.apiUrl}/building-sketch/${buildingSketchId}`
+        );
+    }
+
+    ValidateBuildingQr(qrUuid: string) {
+        return this.http.get<BuildingDTO>(
+            `${this.apiUrl}/building/validate-qr/${qrUuid}`
+        );
+    }
+
+    MapBuildingQr(data: any) {
+        return this.http.post(`${this.apiUrl}/building/map-qr`, data);
     }
 }

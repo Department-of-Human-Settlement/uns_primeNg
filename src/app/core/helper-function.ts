@@ -1,3 +1,5 @@
+import { BuildingDetailDto } from './models/buildings/building-detail.dto';
+
 export function PARSEDATE(date: string) {
     const dateObject = new Date(date);
 
@@ -24,14 +26,16 @@ export function GETBUILDINGFLOORLABEL(
 }
 
 export function PARSEBUILDINGFLOORS(
-    totalFloors: number,
-    basementCount: number,
-    stiltCount: number,
-    atticCount: number,
-    jamthogCount: number
+    building: BuildingDetailDto | null
 ): string {
-    const regularFloorCount =
-        totalFloors - basementCount - stiltCount - jamthogCount - atticCount;
+    if (!building) {
+        return 'NA';
+    }
+    const basementCount = building.basementCount || 0;
+    const stiltCount = building.stiltCount || 0;
+    const floorCount = building.floorCount || 0;
+    const atticCount = building.atticCount || 0;
+    const jamthogCount = building.jamthogCount || 0;
 
     const basementLabel = basementCount
         ? basementCount === 1
@@ -44,11 +48,7 @@ export function PARSEBUILDINGFLOORS(
             : `${stiltCount}S+`
         : '';
     const regularFloorLabel =
-        regularFloorCount > 0
-            ? regularFloorCount - 1 === 0
-                ? `G`
-                : `G+${regularFloorCount - 1}`
-            : 'G';
+        floorCount > 1 ? `G+${floorCount - 1}` : floorCount === 1 ? `G` : '';
 
     const atticLabel = atticCount
         ? atticCount === 1

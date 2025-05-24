@@ -7,6 +7,9 @@ export interface BuildingDetailDto {
     use?: string;
     type?: string;
 
+    typology?: string;
+    yearOfConstruction?: number;
+
     floorCount?: number;
     basementCount?: number;
     stiltCount?: number;

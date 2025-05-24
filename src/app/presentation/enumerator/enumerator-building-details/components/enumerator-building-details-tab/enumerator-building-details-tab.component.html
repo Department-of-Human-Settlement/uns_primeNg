@@ -1,0 +1,159 @@
+<p-toast></p-toast>
+<form
+    class="flex flex-column p-4 p-fluid"
+    [formGroup]="buildingDetailsForm"
+    (ngSubmit)="submitData()"
+>
+    <p class="text-md font-semibold">
+        {{
+            buildingDetailsExists
+                ? "Update Building Details"
+                : "Add Building Details"
+        }}
+    </p>
+    <p-divider></p-divider>
+    <div class="field mb-3">
+        <label for="status">Status</label>
+        <p-dropdown
+            [options]="buildingExistancyOptions"
+            formControlName="existancyStatus"
+            placeholder="Select Status"
+        ></p-dropdown>
+    </div>
+
+    <div id="ifExists">
+        <div class="field mb-3">
+            <label for="associativePosition">Associative Position</label>
+            <p-dropdown
+                [options]="buildingAssociativePositionOptions"
+                formControlName="associativePosition"
+                placeholder="Select Position"
+            ></p-dropdown>
+        </div>
+
+        <div class="field mb-3">
+            <label for="type">Building Type</label>
+            <p-dropdown
+                [options]="['Traditional', 'Contemporary', 'Temporary']"
+                formControlName="type"
+                placeholder="Select Type"
+            ></p-dropdown>
+        </div>
+
+        <div class="field mb-3">
+            <label for="typology">Building Typology</label>
+            <p-dropdown
+                [options]="buildingTypologies"
+                formControlName="typology"
+                placeholder="Select Typology"
+            ></p-dropdown>
+        </div>
+
+        <div class="field mb-3">
+            <label for="use">Building Use/Occupancy Type</label>
+            <p-dropdown
+                [options]="buildingUseOptions"
+                formControlName="use"
+                placeholder="Select Use"
+            ></p-dropdown>
+        </div>
+
+        <div class="field mb-3">
+            <label for="buildingName">Building Name</label>
+            <input
+                id="buildingName"
+                type="text"
+                pInputText
+                formControlName="buildingName"
+                placeholder="Enter Building Name"
+            />
+        </div>
+
+        <div class="field mb-3">
+            <label for="yearOfConstruction">Year of Construction</label>
+            <p-inputNumber
+                formControlName="yearOfConstruction"
+                placeholder="Enter Year of Construction"
+                mode="decimal"
+            ></p-inputNumber>
+        </div>
+    </div>
+
+    <p class="text-md font-semibold mt-4">Contact Details</p>
+    <p-divider></p-divider>
+
+    <div class="field mb-3">
+        <label for="contact">Contact Number (Owner or Manager)</label>
+        <div class="flex align-items-center gap-2">
+            <span class="p-inputgroup-addon">+975</span>
+            <p-inputNumber
+                id="contact"
+                formControlName="contact"
+                placeholder="Enter Contact Number"
+                mode="decimal"
+                useGrouping="false"
+            ></p-inputNumber>
+        </div>
+    </div>
+
+    <p class="text-md font-semibold mt-4">Floor Level Details</p>
+    <p-divider></p-divider>
+    <div class="field mb-3">
+        <label for="jamthogCount">Jamthog</label>
+        <p-dropdown
+            [options]="buildingFloorOptions"
+            formControlName="jamthogCount"
+            placeholder="Select Jamthog Count"
+        ></p-dropdown>
+    </div>
+
+    <div class="field mb-3">
+        <label for="atticCount">Attics</label>
+        <p-dropdown
+            [options]="buildingFloorOptions"
+            formControlName="atticCount"
+            placeholder="Select Attic Count"
+        ></p-dropdown>
+    </div>
+
+    <div class="field mb-3">
+        <label for="regularFloorCount">Regular Floors</label>
+        <p-dropdown
+            [options]="buildingFloorOptions"
+            formControlName="regularFloorCount"
+            placeholder="Select Regular Floor Count"
+        ></p-dropdown>
+    </div>
+
+    <div class="field mb-3">
+        <label for="stiltCount">Stilts</label>
+        <p-dropdown
+            [options]="buildingFloorOptions"
+            formControlName="stiltCount"
+            placeholder="Select Stilt Count"
+        ></p-dropdown>
+    </div>
+
+    <div class="field mb-3">
+        <label for="basementCount">Basements</label>
+        <p-dropdown
+            [options]="buildingFloorOptions"
+            formControlName="basementCount"
+            placeholder="Select Basement Count"
+        ></p-dropdown>
+    </div>
+
+    <div class="field mb-3" *ngIf="buildingDetailsExists">
+        <p>Total Floors Count: {{ totalFloorCount }}</p>
+        <p>Configuration: {{ floorConfig(buildingDetails) }}</p>
+    </div>
+
+    <div class="flex justify-content-end mt-4 gap-2">
+        <button
+            pButton
+            type="submit"
+            [label]="buildingDetailsExists ? 'Update' : 'Save'"
+            class="p-button-primary w-6"
+        ></button>
+    </div>
+</form>

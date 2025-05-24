@@ -27,7 +27,7 @@ export class GeometryDataService {
     }
 
     deleteBuildingFootPrint(id: number) {
-        return this.http.delete( `${this.apiUrl}/building-footprint/${id}`);
+        return this.http.delete(`${this.apiUrl}/building-footprint/${id}`);
     }
 
     updateBuildingGeomBuildingId(buildingId: number, polygonId: number) {
@@ -90,9 +90,10 @@ export class GeometryDataService {
             `${this.apiUrl}/administrative-zone/plots/geom/${administrativeZoneId}`
         );
     }
+
     GetSubAdministrativeBoundary(subAdministrativeZoneId: number) {
         return this.http.get(
-            `${this.apiUrl}/sub-administrative-zone/geom/${subAdministrativeZoneId}`
+            `${this.apiUrl}/subzone/boundary/${subAdministrativeZoneId}`
         );
     }
     GetBuildingFootprintsBySubAdministrativeBoundary(

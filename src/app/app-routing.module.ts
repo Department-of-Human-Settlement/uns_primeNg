@@ -94,6 +94,13 @@ import { AdminLayoutComponent } from './presentation/layout/admin/admin-layout.c
                         },
                     ],
                 },
+                {
+                    path: 'enum',
+                    loadChildren: () =>
+                        import(
+                            './presentation/enumerator/enumerator.routing.module'
+                        ).then((m) => m.EnumeratorRoutingModule),
+                },
 
                 // { path: '**', redirectTo: '/notfound' },
                 {

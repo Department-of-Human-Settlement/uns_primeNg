@@ -1,0 +1,155 @@
+<div *ngIf="unit">
+    <div class="">
+        <div class="text-center">
+            <p class="text-3xl font-bold">
+                {{ unit.unitNumberPrefix }}-{{ unit.unitNumber }}
+            </p>
+            <p class="text-2xl" *ngIf="unitDetails">
+                {{ unitDetails.name }}
+            </p>
+        </div>
+
+        <p
+            *ngIf="unit.isLocked"
+            class="flex justify-content-center align-items-center gap-2 text-tertiary-50 text-xs"
+        >
+            <i class="pi pi-lock"></i> Locked at the time of survey
+        </p>
+    </div>
+
+    <form [formGroup]="unitDetailsForm" class="flex flex-column p-fluid">
+        <p class="font-semibold">Base Details</p>
+        <div class="field">
+            <label for="occupancyStatus" class="block mb-1 text-sm font-medium"
+                >Unit Occupancy</label
+            >
+            <p-dropdown
+                [options]="unitOccupancyTypes"
+                formControlName="occupancyStatus"
+                placeholder="Select Occupancy"
+                class="w-full"
+            ></p-dropdown>
+        </div>
+
+        <div class="field">
+            <label for="use" class="block mb-1 text-sm font-medium"
+                >Unit Use</label
+            >
+            <p-dropdown
+                [options]="unitUses"
+                formControlName="use"
+                placeholder="Select Use"
+                class="w-full"
+            ></p-dropdown>
+        </div>
+
+        <div class="field">
+            <label for="name" class="block mb-1 text-sm font-medium"
+                >Unit Name(shopname,officename..etc)</label
+            >
+            <input
+                formControlName="name"
+                type="text"
+                pInputText
+                placeholder="Enter Unit Name"
+                class="w-full"
+            />
+        </div>
+
+        <div class="field">
+            <label for="contact" class="block mb-1 text-sm font-medium"
+                >Contact (Occupant/Owner)</label
+            >
+            <div class="flex align-items-center gap-2">
+                <span>+975</span>
+                <input
+                    formControlName="contact"
+                    type="tel"
+                    pInputText
+                    placeholder="Enter Contact Number"
+                    class="w-full"
+                />
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="numberOfBedrooms" class="block mb-1 text-sm font-medium"
+                >Number of Bedrooms</label
+            >
+            <p-inputNumber
+                formControlName="numberOfBedrooms"
+                [min]="0"
+                placeholder="Enter Number of Bedrooms"
+                class="w-full"
+            ></p-inputNumber>
+        </div>
+
+        <div class="field">
+            <label for="totalFemale" class="block mb-1 text-sm font-medium"
+                >Number of Female</label
+            >
+            <p-inputNumber
+                formControlName="totalFemale"
+                [min]="0"
+                placeholder="Enter Number of Female"
+                class="w-full"
+            ></p-inputNumber>
+        </div>
+
+        <div class="field">
+            <label for="totalMale" class="block mb-1 text-sm font-medium"
+                >Number of Male</label
+            >
+            <p-inputNumber
+                formControlName="totalMale"
+                [min]="0"
+                placeholder="Enter Number of Male"
+                class="w-full"
+            ></p-inputNumber>
+        </div>
+
+        <div class="field">
+            <label for="isRented" class="block mb-1 text-sm font-medium"
+                >Is it Rented?</label
+            >
+            <p-dropdown
+                [options]="[
+                    { label: 'Yes', value: true },
+                    { label: 'No', value: false }
+                ]"
+                formControlName="isRented"
+                placeholder="Select Rental Status"
+                class="w-full"
+            ></p-dropdown>
+        </div>
+
+        <div class="field">
+            <label for="rent" class="block mb-1 text-sm font-medium"
+                >Monthly Rent (Nu.)</label
+            >
+            <p-inputNumber
+                formControlName="rent"
+                [min]="0"
+                placeholder="Enter Monthly Rent"
+                class="w-full"
+            ></p-inputNumber>
+        </div>
+
+        <div class="flex justify-content-end gap-4">
+            <button
+                pButton
+                type="button"
+                [label]="unitDetails ? 'Update' : 'Create'"
+                class="p-button-primary"
+                (click)="addOrUpdate()"
+            ></button>
+            <button
+                pButton
+                type="button"
+                label="Cancel"
+                class="p-button-secondary"
+                (click)="close()"
+            ></button>
+        </div>
+    </form>
+</div>

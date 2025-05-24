@@ -1,0 +1,91 @@
+<div id="map" style="z-index: 0; height: 100vh; width: 100vw">
+    <div
+        class="p-3 absolute flex gap-2"
+        style="z-index: 9999999; right: 0.5rem"
+    ></div>
+
+    <div
+        class="p-3 absolute flex flex-column gap-2 bg-white w-full"
+        style="
+            z-index: 9999999;
+            right: 0;
+            bottom: 0;
+            border-radius: 5px 5px 0 0;
+        "
+    >
+        <div class="flex gap-2">
+            <div *ngIf="selectedPlot">
+                <p>PlotID: {{ selectedPlot.feature.properties.plotid }}</p>
+            </div>
+        </div>
+
+        <div
+            *ngIf="selectedBuilding"
+            class="flex align-items-center justify-content-between gap-2"
+        >
+            <p class="text-2xl font-bold">
+                Building Id:
+                {{ selectedBuilding.feature.properties.buildingid }}
+            </p>
+            <p-button
+                label="Building Details"
+                (click)="goToBuildingDetails()"
+            ></p-button>
+        </div>
+        <p-divider *ngIf="selectedBuilding"></p-divider>
+        <div class="flex justify-content-between align-items-end">
+            <p class="text-lg">
+                <strong>
+                    {{
+                        selectedSubAdministrativeZone
+                            ? selectedSubAdministrativeZone.name
+                            : ""
+                    }}</strong
+                >,
+                <br />
+                <span class="text-sm">
+                    {{
+                        selectedAdministrativeZone
+                            ? selectedAdministrativeZone.name
+                            : ""
+                    }} </span
+                >,
+                <br />
+                <span class="text-sm">
+                    {{ selectedDzongkhag ? selectedDzongkhag.name : "" }}
+                </span>
+            </p>
+            <div class="flex gap-2 flex-wrap justify-content-end">
+                <p-button
+                    label="Back"
+                    outlined="true"
+                    size="small"
+                    (click)="backToZoneSelection()"
+                >
+                </p-button>
+                <p-button
+                    label="Zoom To Layer"
+                    size="small"
+                    (click)="zoomToLayerExtent()"
+                >
+                </p-button>
+                <p-button label="Locate" size="small" (click)="locate()">
+                </p-button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p-dialog
+    [(visible)]="loading"
+    [modal]="true"
+    [closable]="false"
+    [dismissableMask]="false"
+    [showHeader]="true"
+    [contentStyle]="{ textAlign: 'center' }"
+>
+    <div class="flex flex-column align-items-center justify-content-center">
+        <i class="pi pi-spin pi-spinner text-primary text-4xl mb-3"></i>
+        <p>Loading map data...</p>
+    </div>
+</p-dialog>

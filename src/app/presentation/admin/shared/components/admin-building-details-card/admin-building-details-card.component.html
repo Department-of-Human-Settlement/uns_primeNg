@@ -32,6 +32,10 @@
         {{ buildingDetails.type }}
     </p>
     <p>
+        <strong>Building Typology: </strong>
+        {{ buildingDetails.typology }}
+    </p>
+    <p>
         <strong>Associative Position:</strong>
         {{ buildingDetails.associativePosition }}
     </p>
@@ -42,15 +46,7 @@
 
     <p>
         <strong>Floor Configuration:</strong>
-        {{
-            parseBuildingFloorLabel(
-                buildingDetails.floorCount,
-                buildingDetails.basementCount,
-                buildingDetails.stiltCount,
-                buildingDetails.atticCount,
-                buildingDetails.jamthogCount
-            )
-        }}
+        {{ parseBuildingFloorLabel(buildingDetails) }}
         <br />
         <span *ngIf="buildingDetails.basementCount">
             Basement: {{ buildingDetails.basementCount }}

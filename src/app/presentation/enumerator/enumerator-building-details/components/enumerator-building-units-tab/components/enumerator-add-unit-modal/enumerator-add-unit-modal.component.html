@@ -1,0 +1,96 @@
+<div class="bg-white">
+    <div class="p-fluid">
+        <form [formGroup]="addUnitForm">
+            <div class="field mb-4">
+                <label
+                    for="unitNumberPrefix"
+                    class="block text-sm font-medium mb-2"
+                    >Floor Level</label
+                >
+                <p-dropdown
+                    [options]="floorsArray"
+                    formControlName="unitNumberPrefix"
+                    placeholder="Select Floor Level"
+                    class="w-full"
+                ></p-dropdown>
+            </div>
+
+            <div class="field mb-4">
+                <label for="unitNumber" class="block text-sm font-medium mb-2"
+                    >Unit Number</label
+                >
+                <p-dropdown
+                    [options]="unitNumbers"
+                    formControlName="unitNumber"
+                    placeholder="Select Unit Number"
+                    class="w-full"
+                ></p-dropdown>
+            </div>
+
+            <!-- Is Locked -->
+            <div class="field mb-4">
+                <label for="isLocked" class="block text-sm font-medium mb-2"
+                    >Is It Locked?</label
+                >
+                <p-dropdown
+                    [options]="yesNoOptions"
+                    valueLabel="value"
+                    optionLabel="label"
+                    formControlName="isLocked"
+                    placeholder="Select Lock Status"
+                    class="w-full"
+                ></p-dropdown>
+            </div>
+
+            <!-- Legal Unit -->
+            <div class="field mb-4">
+                <label for="isLegal" class="block text-sm font-medium mb-2"
+                    >Legal Unit?</label
+                >
+                <p-dropdown
+                    [options]="yesNoOptions"
+                    formControlName="isLegal"
+                    valueLabel="value"
+                    optionLabel="label"
+                    placeholder="Select Legal Status"
+                    class="w-full"
+                ></p-dropdown>
+            </div>
+
+            <!-- Unit Span -->
+            <div class="field mb-4">
+                <label for="unitSpan" class="block text-sm font-medium mb-2"
+                    >Unit Foor Span</label
+                >
+                <p-dropdown
+                    [options]="buildingFloorOptions"
+                    formControlName="unitSpan"
+                    placeholder="Select Unit Span"
+                    class="w-full"
+                ></p-dropdown>
+            </div>
+
+            <!-- Buttons -->
+            <div
+                class="flex justify-content-center align-items-center gap-4 mt-5"
+            >
+                <button
+                    pButton
+                    type="button"
+                    label="Add Unit"
+                    icon="pi pi-check"
+                    class="p-button-primary"
+                    (click)="addNewUnit()"
+                ></button>
+                <button
+                    pButton
+                    type="button"
+                    label="Cancel"
+                    icon="pi pi-times"
+                    class="p-button-secondary"
+                    (click)="close()"
+                ></button>
+            </div>
+        </form>
+    </div>
+</div>

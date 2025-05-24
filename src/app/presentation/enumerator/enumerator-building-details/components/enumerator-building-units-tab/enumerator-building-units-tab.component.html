@@ -1,0 +1,115 @@
+<div class="p-4">
+    <p *ngIf="!buildingDetails" class="text-red-500">
+        *Building Details not added. Please add Building Details
+    </p>
+
+    <!-- Floor Level Selector -->
+    <div *ngIf="buildingDetails">
+        <div class="flex justify-content-between mb-4" *ngIf="totalFloorCount">
+            <p>Total Floors: {{ totalFloorCount }}</p>
+            <p>Floor Configuration: {{ getFloorConfig(buildingDetails) }}</p>
+        </div>
+
+        <div
+            class="flex justify-content-between gap-4 my-2"
+            *ngIf="totalFloorCount"
+        >
+            <div class="flex flex-1 align-item-center p-fluid">
+                <p class="bg-gray-50 text-gray-900 rounded-sm block p-2">
+                    Select Floor Level
+                </p>
+                <p-dropdown
+                    [(ngModel)]="selectedFloor"
+                    [options]="floorsArray"
+                    placeholder="Select Floor"
+                    class="flex-1"
+                    (onChange)="getUnitsByFloorLevel()"
+                ></p-dropdown>
+            </div>
+            <div>
+                <button
+                    pButton
+                    type="button"
+                    label="Add Units"
+                    icon="pi pi-plus"
+                    size="small"
+                    class="p-button-primary"
+                    (click)="openAddUnitsModal()"
+                ></button>
+            </div>
+        </div>
+
+        <p *ngIf="!totalFloorCount">
+            *No Floors Details added. Please add Floor Details
+        </p>
+        <p-divider></p-divider>
+        <!-- Units List -->
+        <div *ngIf="units.length">
+            <div
+                *ngFor="let unit of units"
+                class="flex my-4 border-bottom-1 surface-border align-items-center justify-content-between py-2"
+            >
+                <div class="flex gap-2 align-items-center w-4 text-center">
+                    <div>
+                        <p class="text-lg font-bold">
+                            {{ unit.unitNumberPrefix }}-{{ unit.unitNumber }}
+                        </p>
+                        <p
+                            *ngIf="unit.isLocked"
+                            class="flex text-sm align-items-center"
+                        >
+                            <i class="pi pi-lock mr-2"></i> Locked
+                        </p>
+                        <p *ngIf="unit.unitDetail" class="text-xs">
+                            {{ unit.unitDetail.name }}
+                        </p>
+                    </div>
+                </div>
+                <div *ngIf="unit.unitDetail" class="w-4 text-sm">
+                    <p>
+                        {{ unit.unitDetail.occupancyStatus }}
+                    </p>
+                    <p *ngIf="unit.unitDetail.use">
+                        Use: {{ unit.unitDetail.use }}
+                    </p>
+                    <p *ngIf="unit.unitDetail.rent">
+                        rent: {{ unit.unitDetail.rent }}
+                    </p>
+                </div>
+
+                <div class="flex flex-column text-sm gap-2 w-4">
+                    <button
+                        pButton
+                        type="button"
+                        label="Edit"
+                        icon="pi pi-pencil"
+                        size="small"
+                        class="p-button-primary"
+                        (click)="openEditUnitModal(unit)"
+                    ></button>
+                    <button
+                        pButton
+                        type="button"
+                        label="QR"
+                        size="small"
+                        icon="pi pi-qrcode"
+                        class="p-button-primary"
+                        (click)="openViewUnitQR(unit)"
+                    ></button>
+                    <button
+                        pButton
+                        type="button"
+                        label="Details"
+                        icon="pi pi-eye"
+                        class="p-button-secondary"
+                        (click)="openViewUnitDetails(unit)"
+                    ></button>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="totalFloorCount && !units.length">
+            <p>No Units added</p>
+        </div>
+    </div>
+</div>

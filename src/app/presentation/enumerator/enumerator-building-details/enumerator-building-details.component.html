@@ -1,0 +1,50 @@
+<div class="flex flex-column gap-2 p-3 bg-white">
+    <div class="flex gap-2 mb-4">
+        <p-button
+            label="Select Zone"
+            outlined="true"
+            size="small"
+            (click)="goToSelectZone()"
+        ></p-button>
+        <p-button
+            label="Map View"
+            size="small"
+            (click)="goToMapView()"
+        ></p-button>
+    </div>
+    <div class="flex flex-column text-center">
+        <p class="text-2xl">ID:{{ buildingId }}</p>
+        <p class="text-3xl">
+            <span class="font-bold"> {{ floorConfig }}</span> <br />
+            <span *ngIf="buildingDetails?.typology" class="text-sm">
+                {{ buildingDetails.typology }} Building
+            </span>
+        </p>
+    </div>
+</div>
+<p-tabView class="bg-white">
+    <p-tabPanel header="Details">
+        <app-enumerator-building-details-tab
+            [buildingDetails]="buildingDetails"
+            [buildingDetailsExists]="buildingDetailsExists"
+            (buildingDetailsUpdated)="onBuildingDetailsUpdated($event)"
+        ></app-enumerator-building-details-tab>
+    </p-tabPanel>
+    <p-tabPanel header="Photographs">
+        <app-enumerator-building-photos-tab></app-enumerator-building-photos-tab>
+    </p-tabPanel>
+    <p-tabPanel header="Sketches">
+        <app-enumerator-building-sketches-tab></app-enumerator-building-sketches-tab>
+    </p-tabPanel>
+    <p-tabPanel header="QR ">
+        <app-enumerator-building-qr-tab
+            [building]="building"
+        ></app-enumerator-building-qr-tab>
+    </p-tabPanel>
+    <p-tabPanel header="Units">
+        <app-enumerator-building-units-tab
+            [buildingDetails]="buildingDetails"
+            [buildingId]="buildingId"
+        ></app-enumerator-building-units-tab>
+    </p-tabPanel>
+</p-tabView>

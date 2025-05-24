@@ -1,0 +1,105 @@
+<p-confirmDialog></p-confirmDialog>
+<div class="flex flex-column h-screen font-anuphan">
+    <p *ngIf="unit" class="text-4xl font-bold text-center">
+        Map QR for {{ unit.unitNumberPrefix }} - {{ unit.unitNumber }}
+    </p>
+
+    <!-- QR Code Scanning Section -->
+    <div *ngIf="qrVerificationOngoing && unit?.qrUuid === null">
+        <div class="text-center my-2 rounded mx-4 p-4 text-secondary-600">
+            <p class="text-xl font-bold">Scan QR Code</p>
+            <p class="text-xs text-secondary-400">
+                Scan the QR and wait for the verification results
+            </p>
+        </div>
+        <zxing-scanner
+            #scanner
+            [start]="unit?.qrUuid === null"
+            [device]="currentDevice"
+            (scanSuccess)="handleQrCodeResult($event)"
+        ></zxing-scanner>
+    </div>
+
+    <!-- QR Verification Section -->
+    <div *ngIf="!qrVerificationOngoing && !isQrMapped" class="p-6">
+        <!-- Valid QR Code -->
+        <div class="text-center" *ngIf="isQrValid">
+            <p class="text-sm text-secondary-700 my-2">
+                {{ qrVerificationResultMessage }}
+            </p>
+            <div class="flex flex-column align-items-center">
+                <qrcode
+                    [qrdata]="qrResultString"
+                    [allowEmptyString]="true"
+                    [cssClass]="'center'"
+                    [errorCorrectionLevel]="'high'"
+                    [colorDark]="'#7AADA6'"
+                    [colorLight]="'#FFFFFF00'"
+                    [elementType]="'svg'"
+                    [scale]="1"
+                    [title]="'UnitQR'"
+                    [width]="120"
+                ></qrcode>
+                <p class="text-center text-secondary-700">
+                    {{ qrResultString }}
+                </p>
+            </div>
+            <div class="flex gap-2 text-sm">
+                <button
+                    pButton
+                    label="Map QR to Unit?"
+                    class="p-button-primary w-full"
+                    (click)="confirmMapQrcode()"
+                ></button>
+                <button
+                    pButton
+                    label="Rescan"
+                    class="p-button-secondary w-full"
+                    (click)="rescan()"
+                ></button>
+            </div>
+        </div>
+
+        <!-- Invalid QR Code -->
+        <div
+            *ngIf="!isQrValid"
+            class="flex flex-column text-center align-items-center my-6"
+        >
+            <p class="text-tertiary-600 text-sm font-semibold">Invalid QR</p>
+            <p>{{ qrVerificationResultMessage }}</p>
+            <button
+                pButton
+                label="Scan another QR"
+                class="p-button-primary w-full"
+                (click)="rescan()"
+            ></button>
+        </div>
+    </div>
+
+    <!-- QR Already Mapped Section -->
+    <div class="flex flex-column align-items-center" *ngIf="unit?.qrUuid">
+        <qrcode
+            [qrdata]="unit.qrUuid"
+            [allowEmptyString]="true"
+            [cssClass]="'center'"
+            [errorCorrectionLevel]="'high'"
+            [colorDark]="'#7AADA6'"
+            [colorLight]="'#FFFFFF00'"
+            [elementType]="'svg'"
+            [scale]="1"
+            [title]="'UnitQR'"
+            [width]="200"
+        ></qrcode>
+        <div class="text-primary font-bold text-center p-4">
+            {{ unit.unitNumberPrefix }} - {{ unit.unitNumber }}
+        </div>
+        <p>Unit has been Mapped to</p>
+        <p>QR UUID: {{ unit.qrUuid }}</p>
+        <button
+            pButton
+            label="Un-Map QR"
+            class="p-button-danger"
+            (click)="unMapQr()"
+        ></button>
+    </div>
+</div>

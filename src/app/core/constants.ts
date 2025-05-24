@@ -48,6 +48,20 @@ export const BuildingExistancyStatus = [
     'Others',
 ];
 
+export const BuildingTypologies = [
+    'RCC',
+    'Confined Masonry',
+    'Stone masonry with cement and mud mortar',
+    'Stone masonry with cement mortar',
+    'Rammed Earth',
+    'Brick masonry',
+    'Adobe blocks',
+    'Timber',
+    'Ikra',
+    'Steel',
+    'Others/Informal',
+];
+
 export const BuildingType = ['Traditional', 'Contemporary', 'Temporary'];
 
 export const BuildingAssociativePositions = ['Primary', 'Ancillary'];
@@ -58,10 +72,14 @@ export const PrimaryUses = [
     'Commercial',
     'Hotel',
     'Institutional',
-    'Religious',
-    'Cultural',
+    'Religious Institution',
     'Health',
     'Industrial',
+    'Hospital',
+    'Educational',
+    'Office',
+    'Storage',
+    'Assembly',
 ];
 
 export const NumberedDropDownOptions = [

@@ -38,7 +38,7 @@ export class UnitDataService {
         return this.http.get(`${this.apiUrl}/unit-detail/uid/${unitId}`);
     }
 
-    DeleteUnitAndDetails(unitId:number){
+    DeleteUnitAndDetails(unitId: number) {
         return this.http.delete(`${this.apiUrl}/unit/${unitId}`);
     }
 
@@ -51,5 +51,22 @@ export class UnitDataService {
 
     UpdateUnit(data: any, unitId: number) {
         return this.http.patch(`${this.apiUrl}/unit/${unitId}`, data);
+    }
+
+    GetUnitsByFloorLevelAndBuildingPoints(
+        buildingPointId: number,
+        level: string
+    ) {
+        return this.http.get<UnitDto[]>(
+            `${this.apiUrl}/unit/by-building-level/${buildingPointId}/${level}`
+        );
+    }
+
+    ValidateUnitQr(qrUuid: string) {
+        return this.http.get(`${this.apiUrl}/unit/validate-qr/${qrUuid}`);
+    }
+
+    MapUnitQr(data: any) {
+        return this.http.post(`${this.apiUrl}/unit/map-qr`, data);
     }
 }

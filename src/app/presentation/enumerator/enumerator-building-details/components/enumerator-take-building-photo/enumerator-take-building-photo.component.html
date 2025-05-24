@@ -1,0 +1,50 @@
+<div class="flex flex-column justify-content-center gap-2">
+    <video
+        #videoElement
+        autoplay
+        playsinline
+        class="w-full inset-0 w-full h-full object-cover"
+    ></video>
+
+    <div class="flex justify-content-center gap-4 p-4">
+        <button
+            pButton
+            type="button"
+            icon="pi pi-camera"
+            label="Capture"
+            class="text-black shadow-2 hover:scale-110 transition-transform"
+            (click)="capturePhoto()"
+        ></button>
+
+        <button
+            pButton
+            type="button"
+            label="Cancel"
+            icon="pi pi-times"
+            class="p-button-secondary px-4 py-2 shadow-2 hover:bg-gray-700 transition-all"
+            (click)="closeModal()"
+        ></button>
+    </div>
+
+    <div *ngIf="capturedImage" class="flex gap-4 align-items-end">
+        <img
+            [src]="capturedImage"
+            alt="Captured Image"
+            style="width: 80px; height: auto; border-radius: 5px"
+        />
+
+        <div>
+            <button
+                *ngIf="capturedImage"
+                pButton
+                type="button"
+                label="Upload"
+                icon="pi pi-upload"
+                class="p-button-success px-4 py-2 shadow-2 hover:bg-green-700 transition-all"
+                (click)="uploadImage()"
+            ></button>
+        </div>
+    </div>
+</div>
+
+<p-toast></p-toast>
