@@ -1,6 +1,10 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { AdminLayoutService } from '../service/admin-layout.service';
+import {
+    AuthenticatedUserDTO,
+    AuthService,
+} from 'src/app/core/services/auth.data.service';
 
 @Component({
     selector: 'app-admin-topbar',
@@ -16,5 +20,11 @@ export class AdminTopbarComponent {
 
     @ViewChild('topbarmenu') menu!: ElementRef;
 
-    constructor(public layoutService: AdminLayoutService) {}
+    authenticatedUser: AuthenticatedUserDTO;
+    constructor(
+        public layoutService: AdminLayoutService,
+        private authService: AuthService
+    ) {
+        this.authenticatedUser = this.authService.decodeToken();
+    }
 }

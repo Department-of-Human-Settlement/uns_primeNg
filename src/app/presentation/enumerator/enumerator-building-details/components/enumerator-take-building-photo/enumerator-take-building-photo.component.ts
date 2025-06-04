@@ -12,6 +12,8 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ToastModule } from 'primeng/toast';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { BuildingDataService } from 'src/app/core/services/building.dataservice';
 
 @Component({
@@ -19,7 +21,14 @@ import { BuildingDataService } from 'src/app/core/services/building.dataservice'
     templateUrl: './enumerator-take-building-photo.component.html',
     styleUrls: ['./enumerator-take-building-photo.component.css'],
     standalone: true,
-    imports: [DialogModule, CommonModule, ButtonModule, ToastModule],
+    imports: [
+        DialogModule,
+        CommonModule,
+        ButtonModule,
+        ToastModule,
+        ProgressSpinnerModule,
+        ProgressBarModule,
+    ],
     providers: [MessageService],
 })
 export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
@@ -30,6 +39,11 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
     public capturedImage: string | null = null;
 
     buildingId: number;
+    loading: boolean = false;
+    uploadProgress: number = 0;
+    cameraError: string | null = null;
+    isCameraReady: boolean = false;
+    isUploading: boolean = false;
 
     constructor(
         private buildingService: BuildingDataService,
@@ -51,11 +65,26 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
     async startCamera(): Promise<void> {
         try {
             this.mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' },
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                },
             });
             this.videoElement.nativeElement.srcObject = this.mediaStream;
+            this.videoElement.nativeElement.onloadedmetadata = () => {
+                this.isCameraReady = true;
+                this.cameraError = null;
+            };
         } catch (error) {
             console.error('Error accessing camera:', error);
+            this.cameraError =
+                'Failed to access camera. Please make sure you have granted camera permissions.';
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Camera Error',
+                detail: this.cameraError,
+            });
         }
     }
 
@@ -83,6 +112,9 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
             return;
         }
 
+        this.isUploading = true;
+        this.uploadProgress = 0;
+
         const blob = this.dataURItoBlob(this.capturedImage);
         const file = new File([blob], 'captured-image.png', {
             type: 'image/png',
@@ -93,21 +125,40 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         formData.append('buildingId', this.buildingId.toString());
 
         try {
+            // Simulate upload progress (since actual API doesn't provide progress)
+            const progressInterval = setInterval(() => {
+                if (this.uploadProgress < 90) {
+                    this.uploadProgress += 10;
+                }
+            }, 200);
+
             await this.buildingService
                 .CreateBuildingImage(formData, this.buildingId)
                 .toPromise();
-            this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Image uploaded successfully!',
-            });
-            this.capturedImage = null;
-            this.ref.close({
-                status: 200,
-            });
+
+            clearInterval(progressInterval);
+            this.uploadProgress = 100;
+
+            setTimeout(() => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Image uploaded successfully!',
+                });
+                this.capturedImage = null;
+                this.ref.close({
+                    status: 200,
+                });
+            }, 500); // Give time to see 100% progress
         } catch (error) {
-            this.messageService.add({});
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to upload image',
+            });
             console.error('Upload failed:', error);
+        } finally {
+            this.isUploading = false;
         }
     }
 

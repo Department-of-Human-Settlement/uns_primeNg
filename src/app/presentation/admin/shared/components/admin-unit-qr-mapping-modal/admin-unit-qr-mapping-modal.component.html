@@ -1,0 +1,89 @@
+<p-confirmDialog></p-confirmDialog>
+<div class="flex flex-column">
+    <!-- QR Code Scanning Section -->
+    <div class="surface-section p-3">
+        <div *ngIf="!qrResultString || qrVerificationOngoing">
+            <div class="text-center mb-3">
+                <p class="text-xl font-bold text-900 m-0">Scan QR Code</p>
+                <span class="text-600 text-sm"
+                    >Position the QR code within the frame</span
+                >
+            </div>
+            <div
+                class="scanner-container"
+                style="height: 300px; overflow: hidden"
+            >
+                <zxing-scanner
+                    #scanner
+                    [device]="currentDevice"
+                    (scanSuccess)="handleQrCodeResult($event)"
+                    style="max-height: 100%"
+                ></zxing-scanner>
+            </div>
+        </div>
+
+        <!-- QR Verification Result Section -->
+        <div *ngIf="qrResultString && !qrVerificationOngoing" class="mt-3">
+            <div
+                class="text-center surface-ground p-3 border-round"
+                *ngIf="isQrValid"
+            >
+                <p class="text-600 text-sm mb-2">
+                    {{ qrVerificationResultMessage }}
+                </p>
+                <div class="flex flex-column align-items-center">
+                    <qrcode
+                        [qrdata]="qrResultString"
+                        [allowEmptyString]="true"
+                        [cssClass]="'center'"
+                        [errorCorrectionLevel]="'high'"
+                        [colorDark]="'#111827'"
+                        [colorLight]="'#FFFFFF00'"
+                        [elementType]="'svg'"
+                        [scale]="1"
+                        [title]="'UnitQR'"
+                        [width]="100"
+                    ></qrcode>
+                    <p class="text-sm text-600 mt-2">{{ qrResultString }}</p>
+                </div>
+                <div class="flex justify-content-center gap-2 mt-3">
+                    <p-button
+                        label="Map QR"
+                        icon="pi pi-check"
+                        size="small"
+                        (click)="confirmMapQrcode()"
+                    >
+                    </p-button>
+                    <p-button
+                        label="Rescan"
+                        icon="pi pi-refresh"
+                        size="small"
+                        severity="secondary"
+                        (click)="rescan()"
+                    >
+                    </p-button>
+                </div>
+            </div>
+
+            <div
+                *ngIf="!isQrValid"
+                class="surface-ground p-3 border-round text-center"
+            >
+                <i
+                    class="pi pi-exclamation-circle text-xl text-red-500 mb-2"
+                ></i>
+                <p class="text-600 font-medium mb-2">Invalid QR Code</p>
+                <p class="text-600 text-sm mb-3">
+                    {{ qrVerificationResultMessage }}
+                </p>
+                <p-button
+                    label="Try Again"
+                    icon="pi pi-refresh"
+                    size="small"
+                    (click)="rescan()"
+                >
+                </p-button>
+            </div>
+        </div>
+    </div>
+</div>

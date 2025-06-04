@@ -12,6 +12,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { firstValueFrom } from 'rxjs';
 import { LocationDataService } from 'src/app/core/services/location.dataservice';
 import { selectedLocationJson } from '../enumerator.constants';
+import { EnumeratorSessionStateService } from '../enumerator-session-state.service';
 
 @Component({
     selector: 'app-enumerator-select-zone',
@@ -38,10 +39,17 @@ export class EnumeratorSelectZoneComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private router: Router,
-        private locationService: LocationDataService
+        private locationService: LocationDataService,
+        private sessionState: EnumeratorSessionStateService
     ) {}
 
     ngOnInit(): void {
+        // Clear all session states when initializing zone selection
+        this.sessionState.clearMapState();
+        this.sessionState.clearSelectedBuilding();
+        sessionStorage.removeItem(selectedLocationJson);
+
+        // Load dzongkhags
         this.locationService.GetAllDzonghags().subscribe((res: any[]) => {
             this.dzongkhags = res;
         });

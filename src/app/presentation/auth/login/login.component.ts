@@ -69,6 +69,15 @@ export class LoginComponent implements OnInit {
     }
 
     login() {
+        if (!this.username || !this.password) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Please enter both username and password',
+            });
+            return;
+        }
+
         this.authDataService
             .Login({
                 cid: this.username,
@@ -76,28 +85,53 @@ export class LoginComponent implements OnInit {
             })
             .subscribe({
                 next: (res: any) => {
-                    console.log(res);
-                    if (res.statusCode === 200) {
-                        this.navigate();
+                    if (res.statusCode === 200 && res.token) {
                         this.authDataService.setToken(res.token);
+                        this.token = res.token;
+                        this.decodedToken = this.authDataService.decodeToken();
+
+                        if (this.decodedToken?.role) {
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Welcome to Zhichar.bt',
+                                detail: `Successfully logged in as ${this.decodedToken.role}`,
+                            });
+                            this.authDataService.handleLoginRouting(
+                                this.decodedToken.role
+                            );
+                        }
+                    } else {
                         this.messageService.add({
-                            severity: 'info',
-                            summary: 'Welcome to Zhichar.bt',
-                            detail: 'sucessfully logged in',
+                            severity: 'error',
+                            summary: 'Login Failed',
+                            detail: 'Invalid response from server',
                         });
                     }
                 },
                 error: (error) => {
-                    console.log(error);
+                    console.error('Login error:', error);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Login Failed',
+                        detail:
+                            error.error?.message ||
+                            'Unable to login. Please try again.',
+                    });
                 },
             });
     }
 
     tokenExistsContinue() {
-        this.navigate();
+        this.decodedToken = this.authDataService.decodeToken();
+
+        this.navigate(this.decodedToken.role);
     }
-    navigate() {
-        this.router.navigate(['/admin']);
+    navigate(role: string) {
+        if (role === 'enumerator') {
+            this.router.navigate(['/enum']);
+        } else if (role === 'admin') {
+            this.router.navigate(['/admin']);
+        }
     }
 
     removeToken() {

@@ -15,6 +15,8 @@ import { EnumeratorAddUnitModalComponent } from './components/enumerator-add-uni
 import { PARSEBUILDINGFLOORS } from 'src/app/core/helper-function';
 import { EnumeratorViewUnitDetailsModalComponent } from './components/enumerator-view-unit-details-modal/enumerator-view-unit-details-modal.component';
 import { EnumeratorUnitQrViewModalComponent } from './components/enumerator-unit-qr-view-modal/enumerator-unit-qr-view-modal.component';
+import { ConfirmationService } from 'primeng/api';
+import { ConfirmDialog, ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
     selector: 'app-enumerator-building-units-tab',
@@ -29,9 +31,11 @@ import { EnumeratorUnitQrViewModalComponent } from './components/enumerator-unit
         ButtonModule,
         DividerModule,
         RouterModule,
+        QRCodeModule,
+        ConfirmDialogModule,
         DividerModule,
     ],
-    providers: [DialogService],
+    providers: [DialogService, ConfirmationService],
 })
 export class EnumeratorBuildingUnitsTabComponent implements OnInit {
     @Input() buildingDetails: BuildingDetailDto = {} as BuildingDetailDto;
@@ -50,7 +54,8 @@ export class EnumeratorBuildingUnitsTabComponent implements OnInit {
     constructor(
         private unitService: UnitDataService,
         private router: Router,
-        private dialogService: DialogService
+        private dialogService: DialogService,
+        private confirmationService: ConfirmationService
     ) {}
 
     ngOnInit(): void {}
@@ -80,6 +85,11 @@ export class EnumeratorBuildingUnitsTabComponent implements OnInit {
                 selectedFloor: this.selectedFloor,
                 floorsArray: this.floorsArray,
             },
+        });
+        this.ref.onClose.subscribe((res) => {
+            if (res && res.status === 200) {
+                this.getUnitsByFloorLevel();
+            }
         });
     }
 
@@ -151,6 +161,33 @@ export class EnumeratorBuildingUnitsTabComponent implements OnInit {
             header: 'Unit QR',
             width: '100%',
             data: unit,
+        });
+        this.ref.onClose.subscribe((res) => {
+            if (res && res.success) {
+                this.getUnitsByFloorLevel();
+            }
+        });
+    }
+
+    confirmDeleteUnit(unit: UnitDto): void {
+        this.confirmationService.confirm({
+            message: 'Are you sure you want to delete this unit?',
+            header: 'Confirm Delete',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.unitService.DeleteUnitAndDetails(unit.id).subscribe({
+                    next: (res) => {
+                        console.log('Unit deleted successfully:', res);
+                        this.getUnitsByFloorLevel();
+                    },
+                    error: (err) => {
+                        console.error('Failed to delete unit:', err);
+                    },
+                });
+            },
+            reject: () => {
+                console.log('Delete action canceled.');
+            },
         });
     }
 }

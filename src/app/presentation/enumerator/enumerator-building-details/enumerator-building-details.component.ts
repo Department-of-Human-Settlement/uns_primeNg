@@ -7,12 +7,12 @@ import { EnumeratorBuildingDetailsTabComponent } from './components/enumerator-b
 import { BuildingDataService } from 'src/app/core/services/building.dataservice';
 import { BuildingDetailDataService } from 'src/app/core/services/building-detail.dataservice';
 import { EnumeratorBuildingPhotosTabComponent } from './components/enumerator-building-photos-tab/enumerator-building-photos-tab.component';
-import { EnumeratorBuildingSketchesTabComponent } from './components/enumerator-building-sketches-tab/enumerator-building-sketches-tab.component';
 import { EnumeratorBuildingUnitsTabComponent } from './components/enumerator-building-units-tab/enumerator-building-units-tab.component';
 import { BuildingDetailDto } from 'src/app/core/models/buildings/building-detail.dto';
 import { PARSEBUILDINGFLOORS } from 'src/app/core/helper-function';
 import { selectedLocationJson } from '../enumerator.constants';
 import { EnumeratorBuildingQrTabComponent } from './components/enumerator-building-qr-tab/enumerator-building-qr-tab.component';
+import { EnumeratorSessionStateService } from '../enumerator-session-state.service';
 
 @Component({
     selector: 'app-enumerator-building-details',
@@ -25,7 +25,6 @@ import { EnumeratorBuildingQrTabComponent } from './components/enumerator-buildi
         ButtonModule,
         EnumeratorBuildingDetailsTabComponent,
         EnumeratorBuildingPhotosTabComponent,
-        EnumeratorBuildingSketchesTabComponent,
         EnumeratorBuildingUnitsTabComponent,
         EnumeratorBuildingQrTabComponent,
     ],
@@ -43,7 +42,8 @@ export class EnumeratorBuildingDetailsComponent implements OnInit {
         private route: ActivatedRoute,
         private buildingDataService: BuildingDataService,
         private buildingDetailService: BuildingDetailDataService,
-        private router: Router
+        private router: Router,
+        private sessionState: EnumeratorSessionStateService
     ) {}
 
     ngOnInit(): void {
@@ -86,7 +86,6 @@ export class EnumeratorBuildingDetailsComponent implements OnInit {
         const location = JSON.parse(
             sessionStorage.getItem(selectedLocationJson)
         );
-
         this.router.navigate([`/enum/load-buildings/${location.subZone.id}`]);
     }
 }

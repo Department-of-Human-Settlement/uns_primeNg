@@ -42,6 +42,7 @@ import { AdminBuildingDetailsCardComponent } from '../components/admin-building-
 import { BuildingDetailDataService } from 'src/app/core/services/building-detail.dataservice';
 import { AdminUnitsCardComponent } from '../components/admin-units-card/admin-units-card.component';
 import { AdminBuildingOwnershipCardComponent } from '../components/admin-building-ownership-card/admin-building-ownership-card.component';
+import { AdminBuildingImagesCardComponent } from '../components/admin-building-images-card/admin-building-images-card.component';
 
 @Component({
     selector: 'app-admin-view-building',
@@ -64,6 +65,7 @@ import { AdminBuildingOwnershipCardComponent } from '../components/admin-buildin
         AdminBuildingDetailsCardComponent,
         AdminUnitsCardComponent,
         AdminBuildingOwnershipCardComponent,
+        AdminBuildingImagesCardComponent,
     ],
     templateUrl: './admin-view-building.component.html',
     styleUrl: './admin-view-building.component.scss',

@@ -1,38 +1,34 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ZXingScannerComponent, ZXingScannerModule } from '@zxing/ngx-scanner';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { BuildingDTO } from 'src/app/core/models/buildings/building.dto';
+import { BuildingDataService } from 'src/app/core/services/building.dataservice';
 import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
 import { QRCodeModule } from 'angularx-qrcode';
-import { UnitDto } from 'src/app/core/models/units/unit.dto';
-import { UnitDataService } from 'src/app/core/services/unit.dataservice';
 
 @Component({
-    selector: 'app-enumerator-unit-qr-view-modal',
-    templateUrl: './enumerator-unit-qr-view-modal.component.html',
-    styleUrls: ['./enumerator-unit-qr-view-modal.component.css'],
+    selector: 'app-admin-qr-mapping-modal',
+    templateUrl: './admin-qr-mapping-modal.component.html',
     standalone: true,
     imports: [
         CommonModule,
+        ButtonModule,
         ConfirmDialogModule,
         ZXingScannerModule,
-        ButtonModule,
-        ToastModule,
         QRCodeModule,
     ],
-    providers: [ConfirmationService, MessageService],
+    providers: [ConfirmationService],
 })
-export class EnumeratorUnitQrViewModalComponent implements OnInit {
-    unit: UnitDto;
-    unitId: number;
+export class AdminQrMappingModalComponent implements OnInit {
+    building: BuildingDTO;
+    buildingId: number;
 
     qrResultString: string | null = null;
     qrVerificationOngoing: boolean = true;
     isQrValid: boolean = false;
-    isQrMapped: boolean = false;
     qrVerificationResultMessage: string = '';
     currentDevice: MediaDeviceInfo | null = null;
 
@@ -43,13 +39,13 @@ export class EnumeratorUnitQrViewModalComponent implements OnInit {
     @ViewChild('scanner') scanner!: ZXingScannerComponent;
 
     constructor(
-        private unitDataService: UnitDataService,
+        private buildingDataService: BuildingDataService,
         private confirmationService: ConfirmationService,
         private config: DynamicDialogConfig,
         private ref: DynamicDialogRef
     ) {
-        this.unit = this.config.data;
-        this.unitId = this.unit.id;
+        this.building = this.config.data.building;
+        this.buildingId = this.building.id;
     }
 
     ngOnInit(): void {
@@ -89,78 +85,69 @@ export class EnumeratorUnitQrViewModalComponent implements OnInit {
         this.qrResultString = result;
         this.qrVerificationOngoing = false;
 
-        this.unitDataService.ValidateUnitQr(this.qrResultString).subscribe({
-            next: (res) => {
-                this.qrVerificationResultMessage = 'QR Code Valid';
-                this.isQrValid = true;
-            },
-            error: (err) => {
-                this.isQrValid = false;
-                this.qrVerificationResultMessage =
-                    err.error.message || 'Invalid QR Code';
-            },
-        });
-    }
-
-    confirmMapQrcode(): void {
-        if (!this.qrResultString || !this.unit) {
-            console.error('No QR code detected or unit is not defined.');
-            return;
-        }
-
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to map this QR code to the unit?',
-            header: 'Confirm QR Mapping',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.unitDataService
-                    .UpdateUnit({ qrUuid: this.qrResultString }, this.unit.id)
-                    .subscribe({
-                        next: () => {
-                            this.ref.close({ success: true });
-                        },
-                        error: (err) => {
-                            console.error('Failed to map QR code:', err);
-                            this.ref.close({ success: false });
-                        },
-                    });
-            },
-            reject: () => {
-                console.log('QR mapping canceled.');
-            },
-        });
+        this.buildingDataService
+            .ValidateBuildingQr(this.qrResultString)
+            .subscribe({
+                next: (res) => {
+                    this.qrVerificationResultMessage = 'QR Code Valid';
+                    this.isQrValid = true;
+                },
+                error: (err) => {
+                    this.isQrValid = false;
+                    this.qrVerificationResultMessage =
+                        err.error.message || 'Invalid QR Code';
+                },
+            });
     }
 
     rescan(): void {
+        if (!this.scanner) return;
         this.qrResultString = null;
         this.isQrValid = false;
         this.qrVerificationResultMessage = '';
         this.qrVerificationOngoing = true;
+        this.scanner.scanStart();
     }
 
-    unMapQr(): void {
-        if (!this.unit) return;
+    confirmMapQrcode(): void {
+        if (!this.qrResultString || !this.building) {
+            console.error('No QR code detected or building is not defined.');
+            return;
+        }
 
         this.confirmationService.confirm({
             message:
-                'Are you sure you want to unmap the QR code from this unit?',
-            header: 'Confirm Unmap',
+                'Are you sure you want to map this QR code to the building?',
+            header: 'Confirm QR Mapping',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.unit.qrUuid = null;
-                this.unitDataService
-                    .UpdateUnit({ qrUuid: null }, this.unitId)
+                this.buildingDataService
+                    .MapBuildingQr({
+                        qrUuid: this.qrResultString,
+                        buildingId: this.buildingId,
+                    })
                     .subscribe({
                         next: (res) => {
-                            console.log('QR code unmapped successfully:', res);
+                            this.building.qrUuid = this.qrResultString;
+                            this.qrVerificationResultMessage =
+                                'QR Code successfully mapped!';
+                            this.isQrValid = true;
+                            this.buildingDataService
+                                .GetBuildingById(this.buildingId)
+                                .subscribe({
+                                    next: (res) => {
+                                        // Close the dialog with success status
+                                        this.ref.close({ success: true });
+                                    },
+                                });
                         },
                         error: (err) => {
-                            console.error('Failed to unmap QR code:', err);
+                            console.error('Failed to map QR code:', err);
+                            this.qrVerificationResultMessage =
+                                'Failed to map QR code. Please try again.';
+                            this.isQrValid = false;
                         },
                     });
-            },
-            reject: () => {
-                console.log('Unmap action canceled.');
             },
         });
     }

@@ -1,0 +1,29 @@
+
+
+:host ::ng-deep {
+    .p-progressbar {
+        height: 0.5rem;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .p-progressbar .p-progressbar-value {
+        background: var(--primary-color);
+    }
+
+    .p-button.p-button-lg {
+        width: 4rem;
+        height: 4rem;
+        
+        .p-button-icon {
+            font-size: 1.5rem;
+        }
+    }
+
+    .p-button.p-button-plain {
+        color: #fff;
+        
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    }
+}

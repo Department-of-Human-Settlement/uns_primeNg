@@ -1,6 +1,7 @@
 import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { AdminLayoutComponent } from './presentation/layout/admin/admin-layout.component';
+import { authGuard } from './core/guards/auth.guard';
 
 @NgModule({
     imports: [
@@ -9,6 +10,7 @@ import { AdminLayoutComponent } from './presentation/layout/admin/admin-layout.c
                 {
                     path: 'admin',
                     component: AdminLayoutComponent,
+                    canActivate: [() => authGuard(['admin'])],
                     children: [
                         {
                             path: '',
@@ -96,13 +98,13 @@ import { AdminLayoutComponent } from './presentation/layout/admin/admin-layout.c
                 },
                 {
                     path: 'enum',
+                    canActivate: [() => authGuard(['enumerator'])],
                     loadChildren: () =>
                         import(
                             './presentation/enumerator/enumerator.routing.module'
                         ).then((m) => m.EnumeratorRoutingModule),
                 },
 
-                // { path: '**', redirectTo: '/notfound' },
                 {
                     path: '',
                     redirectTo: 'login',

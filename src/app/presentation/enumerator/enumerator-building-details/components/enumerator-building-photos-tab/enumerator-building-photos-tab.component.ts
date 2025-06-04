@@ -11,7 +11,11 @@ import { EnumeratorTakeBuildingPhotoComponent } from '../enumerator-take-buildin
 import { DialogModule } from 'primeng/dialog';
 import { DividerModule } from 'primeng/divider';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { GalleriaModule } from 'primeng/galleria';
+import { API_URL } from 'src/app/core/constants/constants';
 
 @Component({
     selector: 'app-enumerator-building-photos-tab',
@@ -24,8 +28,11 @@ import { ConfirmationService } from 'primeng/api';
         DialogModule,
         DividerModule,
         ConfirmDialogModule,
+        ToastModule,
+        ProgressSpinnerModule,
+        GalleriaModule,
     ],
-    providers: [DialogService, ConfirmationService],
+    providers: [DialogService, ConfirmationService, MessageService],
 })
 export class EnumeratorBuildingPhotosTabComponent implements OnInit {
     @Input() buildingId!: number;
@@ -33,12 +40,30 @@ export class EnumeratorBuildingPhotosTabComponent implements OnInit {
     buildingImages: BuildingImageDTO[] = [];
     selectedImage: BuildingImageDTO | null = null;
     isImageDialogVisible: boolean = false;
+    loading: boolean = false;
+    galleriaVisible: boolean = false;
+    activeIndex: number = 0;
+    responsiveOptions = [
+        {
+            breakpoint: '1024px',
+            numVisible: 5,
+        },
+        {
+            breakpoint: '768px',
+            numVisible: 3,
+        },
+        {
+            breakpoint: '560px',
+            numVisible: 1,
+        },
+    ];
 
     constructor(
         private buildingService: BuildingDataService,
         private route: ActivatedRoute,
         private dialogService: DialogService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private messageService: MessageService
     ) {}
 
     ngOnInit(): void {
@@ -47,11 +72,21 @@ export class EnumeratorBuildingPhotosTabComponent implements OnInit {
     }
 
     getAllImagesByBuilding(): void {
-        this.buildingService
-            .GetAllImagesByBuilding(this.buildingId)
-            .subscribe((res) => {
+        this.loading = true;
+        this.buildingService.GetAllImagesByBuilding(this.buildingId).subscribe({
+            next: (res) => {
                 this.buildingImages = res;
-            });
+                this.loading = false;
+            },
+            error: (err) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load images',
+                });
+                this.loading = false;
+            },
+        });
     }
 
     openTakePhotoModal(): void {
@@ -74,7 +109,7 @@ export class EnumeratorBuildingPhotosTabComponent implements OnInit {
     }
 
     getImageUri(uri: string): string {
-        return `http://localhost:4322/images/building-image/${uri}`;
+        return `${API_URL}/images/building-image/${uri}`;
     }
 
     deletePhoto(image: BuildingImageDTO): void {
@@ -83,11 +118,25 @@ export class EnumeratorBuildingPhotosTabComponent implements OnInit {
             header: 'Confirm Deletion',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.buildingService
-                    .DeleteBuildingImage(image.id)
-                    .subscribe(() => {
+                this.loading = true;
+                this.buildingService.DeleteBuildingImage(image.id).subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Success',
+                            detail: 'Photo deleted successfully',
+                        });
                         this.getAllImagesByBuilding();
-                    });
+                    },
+                    error: (err) => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Failed to delete photo',
+                        });
+                        this.loading = false;
+                    },
+                });
             },
         });
     }
@@ -100,5 +149,14 @@ export class EnumeratorBuildingPhotosTabComponent implements OnInit {
     closeImageDialog(): void {
         this.selectedImage = null;
         this.isImageDialogVisible = false;
+    }
+
+    showGalleria(index: number): void {
+        this.activeIndex = index;
+        this.galleriaVisible = true;
+    }
+
+    closeGalleria(): void {
+        this.galleriaVisible = false;
     }
 }

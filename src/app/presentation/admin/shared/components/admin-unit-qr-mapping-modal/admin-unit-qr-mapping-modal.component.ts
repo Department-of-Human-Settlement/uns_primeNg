@@ -1,38 +1,34 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ZXingScannerComponent, ZXingScannerModule } from '@zxing/ngx-scanner';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
-import { QRCodeModule } from 'angularx-qrcode';
 import { UnitDto } from 'src/app/core/models/units/unit.dto';
 import { UnitDataService } from 'src/app/core/services/unit.dataservice';
+import { ButtonModule } from 'primeng/button';
+import { QRCodeModule } from 'angularx-qrcode';
 
 @Component({
-    selector: 'app-enumerator-unit-qr-view-modal',
-    templateUrl: './enumerator-unit-qr-view-modal.component.html',
-    styleUrls: ['./enumerator-unit-qr-view-modal.component.css'],
+    selector: 'app-admin-unit-qr-mapping-modal',
+    templateUrl: './admin-unit-qr-mapping-modal.component.html',
     standalone: true,
     imports: [
         CommonModule,
+        ButtonModule,
         ConfirmDialogModule,
         ZXingScannerModule,
-        ButtonModule,
-        ToastModule,
         QRCodeModule,
     ],
-    providers: [ConfirmationService, MessageService],
+    providers: [ConfirmationService],
 })
-export class EnumeratorUnitQrViewModalComponent implements OnInit {
+export class AdminUnitQrMappingModalComponent implements OnInit {
     unit: UnitDto;
     unitId: number;
 
     qrResultString: string | null = null;
     qrVerificationOngoing: boolean = true;
     isQrValid: boolean = false;
-    isQrMapped: boolean = false;
     qrVerificationResultMessage: string = '';
     currentDevice: MediaDeviceInfo | null = null;
 
@@ -48,7 +44,7 @@ export class EnumeratorUnitQrViewModalComponent implements OnInit {
         private config: DynamicDialogConfig,
         private ref: DynamicDialogRef
     ) {
-        this.unit = this.config.data;
+        this.unit = this.config.data.unit;
         this.unitId = this.unit.id;
     }
 
@@ -59,6 +55,7 @@ export class EnumeratorUnitQrViewModalComponent implements OnInit {
                     this.hasDevices = true;
                     this.availableDevices = devices;
 
+                    // Prefer back camera if available
                     for (const device of devices) {
                         if (/back|rear|environment/gi.test(device.label)) {
                             this.currentDevice = device;
@@ -79,6 +76,14 @@ export class EnumeratorUnitQrViewModalComponent implements OnInit {
             this.scanner.permissionResponse.subscribe((perm: boolean) => {
                 this.hasPermission = perm;
             });
+
+            // If remapping, start with QR verification off to show current QR
+            if (this.config.data?.isRemapping) {
+                this.qrVerificationOngoing = false;
+                this.qrResultString = this.unit.qrUuid;
+                this.isQrValid = true;
+                this.qrVerificationResultMessage = 'Current QR Code';
+            }
         }
     }
 
@@ -103,13 +108,12 @@ export class EnumeratorUnitQrViewModalComponent implements OnInit {
     }
 
     confirmMapQrcode(): void {
-        if (!this.qrResultString || !this.unit) {
-            console.error('No QR code detected or unit is not defined.');
-            return;
-        }
+        const message = this.config.data?.isRemapping
+            ? 'Are you sure you want to remap the QR code for this unit?'
+            : 'Are you sure you want to map this QR code to the unit?';
 
         this.confirmationService.confirm({
-            message: 'Are you sure you want to map this QR code to the unit?',
+            message: message,
             header: 'Confirm QR Mapping',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
@@ -125,9 +129,6 @@ export class EnumeratorUnitQrViewModalComponent implements OnInit {
                         },
                     });
             },
-            reject: () => {
-                console.log('QR mapping canceled.');
-            },
         });
     }
 
@@ -136,32 +137,8 @@ export class EnumeratorUnitQrViewModalComponent implements OnInit {
         this.isQrValid = false;
         this.qrVerificationResultMessage = '';
         this.qrVerificationOngoing = true;
-    }
-
-    unMapQr(): void {
-        if (!this.unit) return;
-
-        this.confirmationService.confirm({
-            message:
-                'Are you sure you want to unmap the QR code from this unit?',
-            header: 'Confirm Unmap',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.unit.qrUuid = null;
-                this.unitDataService
-                    .UpdateUnit({ qrUuid: null }, this.unitId)
-                    .subscribe({
-                        next: (res) => {
-                            console.log('QR code unmapped successfully:', res);
-                        },
-                        error: (err) => {
-                            console.error('Failed to unmap QR code:', err);
-                        },
-                    });
-            },
-            reject: () => {
-                console.log('Unmap action canceled.');
-            },
-        });
+        if (this.scanner) {
+            this.scanner.scanStart();
+        }
     }
 }

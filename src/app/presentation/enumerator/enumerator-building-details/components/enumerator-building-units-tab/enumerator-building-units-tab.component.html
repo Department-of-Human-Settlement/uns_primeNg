@@ -44,66 +44,104 @@
         </p>
         <p-divider></p-divider>
         <!-- Units List -->
-        <div *ngIf="units.length">
-            <div
-                *ngFor="let unit of units"
-                class="flex my-4 border-bottom-1 surface-border align-items-center justify-content-between py-2"
-            >
-                <div class="flex gap-2 align-items-center w-4 text-center">
-                    <div>
-                        <p class="text-lg font-bold">
-                            {{ unit.unitNumberPrefix }}-{{ unit.unitNumber }}
-                        </p>
-                        <p
-                            *ngIf="unit.isLocked"
-                            class="flex text-sm align-items-center"
-                        >
-                            <i class="pi pi-lock mr-2"></i> Locked
-                        </p>
-                        <p *ngIf="unit.unitDetail" class="text-xs">
-                            {{ unit.unitDetail.name }}
-                        </p>
-                    </div>
-                </div>
-                <div *ngIf="unit.unitDetail" class="w-4 text-sm">
-                    <p>
-                        {{ unit.unitDetail.occupancyStatus }}
-                    </p>
-                    <p *ngIf="unit.unitDetail.use">
-                        Use: {{ unit.unitDetail.use }}
-                    </p>
-                    <p *ngIf="unit.unitDetail.rent">
-                        rent: {{ unit.unitDetail.rent }}
-                    </p>
-                </div>
+        <div *ngIf="units.length" class="grid">
+            <div *ngFor="let unit of units" class="col-12 md:col-6 lg:col-4">
+                <div class="surface-card p-4 shadow-2 border-round">
+                    <div class="flex flex-column gap-3">
+                        <!-- QR and Unit Number -->
+                        <div class="flex align-items-center gap-3">
+                            <div>
+                                <qrcode
+                                    *ngIf="unit.qrUuid"
+                                    [qrdata]="unit.qrUuid"
+                                    [allowEmptyString]="true"
+                                    [cssClass]="'center'"
+                                    [errorCorrectionLevel]="'high'"
+                                    [colorDark]="'#7AADA6'"
+                                    [colorLight]="'#FFFFFF00'"
+                                    [elementType]="'svg'"
+                                    [scale]="1"
+                                    [title]="'UnitQR'"
+                                    [width]="70"
+                                ></qrcode>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="m-0 font-bold">
+                                    {{ unit.unitNumberPrefix }}-{{
+                                        unit.unitNumber
+                                    }}
+                                </h3>
+                                <div
+                                    *ngIf="unit.isLocked"
+                                    class="flex align-items-center mt-2"
+                                >
+                                    <i class="pi pi-lock text-primary mr-2"></i>
+                                    <span class="text-sm text-primary"
+                                        >Locked</span
+                                    >
+                                </div>
+                                <p
+                                    *ngIf="unit.unitDetail"
+                                    class="text-sm text-500 mt-1 mb-0"
+                                >
+                                    {{ unit.unitDetail.name }}
+                                </p>
+                            </div>
+                            <div *ngIf="unit.unitDetail">
+                                <span class="mb-2 text-600 font-medium">
+                                    {{ unit.unitDetail.occupancyStatus }},
+                                </span>
+                                <span
+                                    *ngIf="unit.unitDetail.use"
+                                    class="mb-2 text-600"
+                                >
+                                    {{ unit.unitDetail.use }},
+                                </span>
+                                <span
+                                    *ngIf="unit.unitDetail.rent"
+                                    class="mb-0 text-600"
+                                >
+                                    Rent: {{ unit.unitDetail.rent }}
+                                </span>
+                            </div>
+                        </div>
 
-                <div class="flex flex-column text-sm gap-2 w-4">
-                    <button
-                        pButton
-                        type="button"
-                        label="Edit"
-                        icon="pi pi-pencil"
-                        size="small"
-                        class="p-button-primary"
-                        (click)="openEditUnitModal(unit)"
-                    ></button>
-                    <button
-                        pButton
-                        type="button"
-                        label="QR"
-                        size="small"
-                        icon="pi pi-qrcode"
-                        class="p-button-primary"
-                        (click)="openViewUnitQR(unit)"
-                    ></button>
-                    <button
-                        pButton
-                        type="button"
-                        label="Details"
-                        icon="pi pi-eye"
-                        class="p-button-secondary"
-                        (click)="openViewUnitDetails(unit)"
-                    ></button>
+                        <!-- Unit Details -->
+
+                        <!-- Actions -->
+                        <div class="flex gap-2 justify-content-end">
+                            <p-button
+                                type="button"
+                                label="Edit"
+                                icon="pi pi-pencil"
+                                size="small"
+                                class="p-button-outlined"
+                                (click)="openEditUnitModal(unit)"
+                            ></p-button>
+                            <p-button
+                                type="button"
+                                label="QR"
+                                size="small"
+                                icon="pi pi-qrcode"
+                                class="p-button-outlined"
+                                (click)="openViewUnitQR(unit)"
+                            ></p-button>
+                            <p-button
+                                type="button"
+                                label="Details"
+                                icon="pi pi-pencil"
+                                size="small"
+                                class="p-button-outlined p-button-secondary"
+                                (click)="openViewUnitDetails(unit)"
+                            ></p-button>
+                            <p-button
+                                icon="pi pi-trash"
+                                size="small"
+                                severity="danger"
+                                (click)="confirmDeleteUnit(unit)"
+                            ></p-button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -112,4 +150,5 @@
             <p>No Units added</p>
         </div>
     </div>
+    <p-confirmDialog></p-confirmDialog>
 </div>

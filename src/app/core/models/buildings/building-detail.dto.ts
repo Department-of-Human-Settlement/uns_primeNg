@@ -9,6 +9,8 @@ export interface BuildingDetailDto {
 
     typology?: string;
     yearOfConstruction?: number;
+    length?: number;
+    breadth?: number;
 
     floorCount?: number;
     basementCount?: number;
@@ -31,6 +33,9 @@ export interface CreateBuildingDetailsDto {
     atticCount?: number;
     jamthogCount?: number;
     contact?: number;
+
+    length?: number;
+    breadth?: number;
 }
 
 export interface UpdateBuildingDetailsDto {
@@ -45,4 +50,6 @@ export interface UpdateBuildingDetailsDto {
     atticCount?: number;
     jamthogCount?: number;
     contact?: number;
+    length?: number;
+    breadth?: number;
 }

@@ -15,17 +15,19 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
+import { ToastModule } from 'primeng/toast';
 import { UnitDto } from 'src/app/core/models/units/unit.dto';
 import { UnitDataService } from 'src/app/core/services/unit.dataservice';
 import { GETBUILDINGFLOORLABEL } from 'src/app/core/helper-function';
 import { EditUnitModalComponent } from '../../admin-view-plot-buildings/edit-unit-modal/edit-unit-modal.component';
 import { AdminEditUnitComponent } from '../crud-modals/units/admin-edit-unit/admin-edit-unit.component';
+import { AdminUnitQrMappingModalComponent } from '../admin-unit-qr-mapping-modal/admin-unit-qr-mapping-modal.component';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { BuildingDetailDto } from 'src/app/core/models/buildings/building-detail.dto';
 import { BuildingDetailDataService } from 'src/app/core/services/building-detail.dataservice';
 import { BuildingOwnershipDto } from 'src/app/core/models/ownership/owner.dto';
 import { OwnershipDataService } from 'src/app/core/services/ownership.dataservice';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
 
 @Component({
     selector: 'app-admin-units-card',
@@ -39,7 +41,9 @@ import { ConfirmationService } from 'primeng/api';
         DynamicDialogModule,
         ConfirmDialogModule,
         QRCodeModule,
+        ToastModule,
     ],
+    providers: [DialogService, ConfirmationService, MessageService],
     styleUrls: ['./admin-units-card.component.css'],
 })
 export class AdminUnitsCardComponent implements OnChanges, OnInit {
@@ -57,8 +61,9 @@ export class AdminUnitsCardComponent implements OnChanges, OnInit {
         private dialogService: DialogService,
         private buildingDetailService: BuildingDetailDataService,
         private confirmationService: ConfirmationService,
-        private ownershipDataService: OwnershipDataService
-    ) { }
+        private ownershipDataService: OwnershipDataService,
+        private messageService: MessageService
+    ) {}
     ngOnInit(): void {
         this.buildingDetailService
             .GetBuildingDetailsByBuildingId(this.buildingId)
@@ -91,7 +96,7 @@ export class AdminUnitsCardComponent implements OnChanges, OnInit {
     }
 
     deleteUnit(unit) {
-        console.log("Delete Unit")
+        console.log('Delete Unit');
         this.confirmationService.confirm({
             target: event.target as EventTarget,
             message: 'Do you want to this unit and its details?',
@@ -102,12 +107,13 @@ export class AdminUnitsCardComponent implements OnChanges, OnInit {
             acceptIcon: 'none',
             rejectIcon: 'none',
             accept: () => {
-                this.unitDataService.DeleteUnitAndDetails(unit.id).subscribe((res) => {
-                    this.getUnitDetails();
-                });
+                this.unitDataService
+                    .DeleteUnitAndDetails(unit.id)
+                    .subscribe((res) => {
+                        this.getUnitDetails();
+                    });
             },
-            reject: () => {
-            },
+            reject: () => {},
         });
     }
 
@@ -143,7 +149,7 @@ export class AdminUnitsCardComponent implements OnChanges, OnInit {
                 this.getUnitDetails();
             }
         });
-        this.ref.onClose
+        this.ref.onClose;
     }
 
     editUnitDetail(unit) {
@@ -174,6 +180,67 @@ export class AdminUnitsCardComponent implements OnChanges, OnInit {
         }
         this.ref.onClose.subscribe((res) => {
             this.getUnitDetails();
+        });
+    }
+
+    startQrScan(unit: UnitDto): void {
+        const ref = this.dialogService.open(AdminUnitQrMappingModalComponent, {
+            header: unit.qrUuid ? 'Remap QR Code' : 'Map QR Code',
+            width: '450px',
+            contentStyle: { overflow: 'visible' },
+            dismissableMask: true,
+            closeOnEscape: true,
+            baseZIndex: 10000,
+            data: {
+                unit: unit,
+                isRemapping: !!unit.qrUuid,
+            },
+        });
+
+        ref.onClose.subscribe((result) => {
+            if (result && result.success) {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: `QR code ${
+                        unit.qrUuid ? 'remapped' : 'mapped'
+                    } successfully`,
+                });
+                this.getUnitDetails();
+            }
+        });
+    }
+
+    unMapQr(unit: UnitDto): void {
+        if (!unit || !unit.qrUuid) return;
+
+        this.confirmationService.confirm({
+            message:
+                'Are you sure you want to unmap the QR code from this unit?',
+            header: 'Confirm Unmap',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.unitDataService
+                    .UpdateUnit({ qrUuid: null }, unit.id)
+                    .subscribe({
+                        next: () => {
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Success',
+                                detail: 'QR code unmapped successfully',
+                            });
+                            this.getUnitDetails();
+                        },
+                        error: (err) => {
+                            console.error('Failed to unmap QR code:', err);
+                            this.messageService.add({
+                                severity: 'error',
+                                summary: 'Error',
+                                detail: 'Failed to unmap QR code',
+                            });
+                        },
+                    });
+            },
         });
     }
 }

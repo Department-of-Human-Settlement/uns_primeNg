@@ -75,7 +75,36 @@
                 formControlName="yearOfConstruction"
                 placeholder="Enter Year of Construction"
                 mode="decimal"
+                [min]="1900"
+                [max]="2025"
+                [useGrouping]="false"
             ></p-inputNumber>
+        </div>
+
+        <div class="grid">
+            <div class="col-6 field mb-3">
+                <label for="length">Length (meters)</label>
+                <p-inputNumber
+                    id="length"
+                    formControlName="length"
+                    placeholder="Enter Length"
+                    [minFractionDigits]="2"
+                    [maxFractionDigits]="2"
+                    mode="decimal"
+                ></p-inputNumber>
+            </div>
+
+            <div class="col-6 field mb-3">
+                <label for="breadth">Breadth (meters)</label>
+                <p-inputNumber
+                    id="breadth"
+                    formControlName="breadth"
+                    placeholder="Enter Breadth"
+                    [minFractionDigits]="2"
+                    [maxFractionDigits]="2"
+                    mode="decimal"
+                ></p-inputNumber>
+            </div>
         </div>
     </div>
 

@@ -5,17 +5,25 @@ import { Observable, forkJoin } from 'rxjs';
 import * as L from 'leaflet';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { BuildingDTO } from 'src/app/core/models/buildings/building.dto';
 import { LocationDataService } from 'src/app/core/services/location.dataservice';
 import { GeometryDataService } from 'src/app/core/services/geometry.dataservice';
 import { DividerModule } from 'primeng/divider';
+import { EnumeratorSessionStateService } from '../enumerator-session-state.service';
 
 @Component({
     selector: 'app-enumerator-load-building',
     templateUrl: './enumerator-load-building.component.html',
     styleUrls: ['./enumerator-load-building.component.css'],
     standalone: true,
-    imports: [CommonModule, ButtonModule, DialogModule, DividerModule],
+    imports: [
+        CommonModule,
+        ButtonModule,
+        DialogModule,
+        DividerModule,
+        TooltipModule,
+    ],
 })
 export class EnumeratorLoadBuildingComponent implements OnInit {
     selectedDzongkhag: any;
@@ -73,9 +81,8 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
 
     constructor(
         private router: Router,
-        private route: ActivatedRoute,
-        private locationService: LocationDataService,
-        private geometryDataService: GeometryDataService
+        private geometryDataService: GeometryDataService,
+        private sessionState: EnumeratorSessionStateService
     ) {}
 
     async ngOnInit(): Promise<void> {
@@ -91,15 +98,28 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
             return;
         }
 
-        const mapState = sessionStorage.getItem('mapState');
-        const selectedBuilding = sessionStorage.getItem('selectedBuilding');
+        const mapState = this.sessionState.getMapState();
+        const selectedBuilding = this.sessionState.getSelectedBuilding();
 
-        if (mapState && selectedBuilding) {
-            const { center, zoom } = JSON.parse(mapState);
-            const buildingState = JSON.parse(selectedBuilding);
-
-            this.renderMap(center, zoom, buildingState);
+        if (mapState) {
+            console.log('Restoring map state:', mapState);
         } else {
+            console.log('No map state found to restore.');
+        }
+        console.log('Map state from session:', mapState);
+        if (mapState && selectedBuilding) {
+            console.log('Restoring map state:', mapState);
+            const { center, zoom } = mapState;
+            const restoredCenter = L.latLng(center.lat, center.lng);
+            console.log(
+                'Restoring map to center:',
+                restoredCenter,
+                'zoom:',
+                zoom
+            );
+            this.renderMap(restoredCenter, zoom, selectedBuilding);
+        } else {
+            console.log('No saved map state found, using default values');
             this.renderMap();
         }
     }
@@ -110,20 +130,23 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
             maxZoom: 21,
         });
 
+        // Create map with default view - proper positioning will happen after layers load
         this.map = L.map('map', {
             layers: [satelliteMap],
             attributionControl: false,
-            zoomControl: false, // Disable zoom control
+            zoomControl: false,
             maxZoom: 25,
             renderer: L.canvas({ tolerance: 3 }),
-        }).setView(center || [27.4712, 89.64191], zoom || 12);
+        }).setView([27.4712, 89.64191], 12);
 
-        this.loadPlotsAndBuildings(buildingState);
+        this.loadPlotsAndBuildings(buildingState, center, zoom);
     }
 
-    loadPlotsAndBuildings(buildingState?: any) {
-        this.clearMapState();
-
+    loadPlotsAndBuildings(
+        buildingState?: any,
+        initialCenter?: L.LatLng,
+        initialZoom?: number
+    ) {
         forkJoin({
             boundary: this.geometryDataService.GetSubAdministrativeBoundary(
                 this.selectedSubzoneId
@@ -136,6 +159,7 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
                     this.selectedSubzoneId
                 ),
         }).subscribe(({ boundary, plots, buildings }) => {
+            // Add layers to map
             this.boundary = L.geoJSON(boundary, {
                 style: () => ({
                     fillColor: 'transparent',
@@ -147,19 +171,6 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
 
             this.plotsGeojson = L.geoJSON(plots as GeoJSON.GeoJsonObject, {
                 style: () => this.defaultPlotStyle,
-                onEachFeature: (feature, layer) => {
-                    layer.on({
-                        click: (e: any) => {
-                            this.selectPlot(feature, layer);
-                            if (
-                                layer instanceof L.Polygon ||
-                                layer instanceof L.Polyline
-                            ) {
-                                this.map.fitBounds(layer.getBounds());
-                            }
-                        },
-                    });
-                },
             }).addTo(this.map);
 
             this.buildingGeojson = L.geoJSON(
@@ -170,10 +181,6 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
                         layer.on({
                             click: (e: any) => {
                                 this.selectBuilding(feature, layer);
-                                console.log(
-                                    'Selected Building ID:',
-                                    feature.properties
-                                );
                                 if (
                                     layer instanceof L.Polygon ||
                                     layer instanceof L.Polyline
@@ -185,7 +192,7 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
                             },
                         });
 
-                        // If buildingState exists, select the saved building
+                        // If this is the previously selected building, select it again
                         if (
                             buildingState &&
                             feature.properties.buildingid ===
@@ -198,7 +205,40 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
             ).addTo(this.map);
 
             this.loading = false;
-            this.fitInitialBound();
+
+            // Now that all layers are loaded, handle map positioning
+            if (buildingState && this.selectedBuilding) {
+                // If we have a selected building, find its layer and zoom to it
+                const buildingLayer = this.buildingGeojson
+                    .getLayers()
+                    .find(
+                        (layer) =>
+                            (layer as any).feature?.properties.buildingid ===
+                            buildingState.buildingid
+                    );
+                if (buildingLayer && 'getBounds' in buildingLayer) {
+                    this.map.fitBounds(
+                        (buildingLayer as L.Polygon).getBounds(),
+                        {
+                            padding: [100, 100],
+                        }
+                    );
+                }
+            } else if (initialCenter && initialZoom) {
+                // Use saved map position if no building is selected
+                console.log(
+                    'Restoring map view to:',
+                    initialCenter,
+                    initialZoom
+                );
+                this.map.setView(initialCenter, initialZoom);
+            } else {
+                // No saved state, fit to bounds
+                this.fitInitialBound();
+            }
+
+            // Always ensure boundary layer is at the back
+            this.boundary.bringToBack();
         });
     }
 
@@ -216,27 +256,35 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
 
     selectBuilding(feature: any, layer: any) {
         this.selectedBuildingId = feature.properties.buildingid;
-        if (this.selectedBuilding) {
-            this.buildingGeojson.resetStyle(this.selectedBuilding.layer);
-        }
+        let center2 = this.map.getCenter();
+        const zoom = this.map.getZoom();
+        this.sessionState.setMapState(
+            { lat: center2.lat, lng: center2.lng },
+            zoom
+        );
+        console.log('Map state saved:', {
+            lat: center2.lat,
+            lng: center2.lng,
+            zoom,
+        });
 
-        if (this.selectedPlot) {
-            this.plotsGeojson.resetStyle(this.selectedPlot.layer);
-            this.selectedPlot = null;
+        // Reset previously selected building style if exists
+        if (this.selectedBuilding?.layer && this.buildingGeojson) {
+            try {
+                this.buildingGeojson.resetStyle(this.selectedBuilding.layer);
+            } catch (error) {
+                console.warn('Could not reset building style:', error);
+            }
         }
 
         this.selectedBuilding = { feature, layer };
 
-        sessionStorage.setItem(
-            'selectedBuilding',
-            JSON.stringify(feature.properties)
+        this.sessionState.setSelectedBuilding(feature.properties);
+        const center = this.map.getCenter();
+        this.sessionState.setMapState(
+            { lat: center.lat, lng: center.lng },
+            this.map.getZoom()
         );
-
-        const mapState = {
-            center: this.map.getCenter(),
-            zoom: this.map.getZoom(),
-        };
-        sessionStorage.setItem('mapState', JSON.stringify(mapState));
 
         layer.setStyle(this.buildingSelectionStyle);
     }
@@ -274,14 +322,15 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
         ]).getBounds();
 
         const center = bounds.getCenter();
-        const zoomLevel = this.selectedBuilding ? 18 : 12;
+        const zoomLevel = 12;
         this.map.setView(center, zoomLevel);
 
         this.boundary.bringToBack();
     }
 
     clearMapState() {
-        localStorage.removeItem('mapState');
+        this.sessionState.clearMapState();
+        this.sessionState.clearSelectedBuilding();
     }
 
     locate() {
@@ -299,13 +348,37 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
         });
     }
     zoomToLayerExtent() {
-        this.fitMapBounds();
+        if (this.buildingGeojson) {
+            const bounds = this.buildingGeojson.getBounds();
+            if (bounds.isValid()) {
+                this.map.fitBounds(bounds, {
+                    padding: [50, 50],
+                    maxZoom: 19, // Prevent zooming in too close
+                });
+            }
+        }
     }
     backToZoneSelection() {
         this.clearMapState();
         this.router.navigate(['/enum']);
     }
     goToBuildingDetails() {
+        // Save current map state before navigating
+        if (this.map) {
+            const center = this.map.getCenter();
+            const zoom = this.map.getZoom();
+            this.sessionState.setMapState(
+                { lat: center.lat, lng: center.lng },
+                zoom
+            );
+            console.log('Map state saved:', {
+                lat: center.lat,
+                lng: center.lng,
+                zoom,
+            });
+        }
+        // Check if map state exists and log it
+
         this.router.navigate([
             `/enum/building-details/${this.selectedBuildingId}`,
         ]);

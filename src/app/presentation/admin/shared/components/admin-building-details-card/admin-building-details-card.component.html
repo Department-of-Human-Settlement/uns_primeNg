@@ -35,6 +35,15 @@
         <strong>Building Typology: </strong>
         {{ buildingDetails.typology }}
     </p>
+
+    <p *ngIf="buildingDetails.length">
+        <strong>Building Length: </strong>
+        {{ buildingDetails.length }}M
+    </p>
+    <p *ngIf="buildingDetails.breadth">
+        <strong>Building Breadth: </strong>
+        {{ buildingDetails.breadth }}M
+    </p>
     <p>
         <strong>Associative Position:</strong>
         {{ buildingDetails.associativePosition }}
