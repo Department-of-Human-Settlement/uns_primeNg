@@ -3,6 +3,7 @@ import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
 import { PasswordModule } from 'primeng/password';
+import { RippleModule } from 'primeng/ripple';
 import { InputTextModule } from 'primeng/inputtext';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.data.service';
@@ -24,6 +25,7 @@ import { DividerModule } from 'primeng/divider';
         ToastModule,
         CommonModule,
         DividerModule,
+        RippleModule,
     ],
     templateUrl: './login.component.html',
     styleUrl: './login.component.scss',
@@ -35,7 +37,7 @@ export class LoginComponent implements OnInit {
     password!: string;
     username!: string;
     remember: boolean = true;
-
+    isLoading: boolean = false;
     token!: string;
 
     decodedToken: any;
@@ -69,7 +71,9 @@ export class LoginComponent implements OnInit {
     }
 
     login() {
+        this.isLoading = true;
         if (!this.username || !this.password) {
+            this.isLoading = false;
             this.messageService.add({
                 severity: 'error',
                 summary: 'Error',

@@ -11,6 +11,7 @@ import { LocationDataService } from 'src/app/core/services/location.dataservice'
 import { GeometryDataService } from 'src/app/core/services/geometry.dataservice';
 import { DividerModule } from 'primeng/divider';
 import { EnumeratorSessionStateService } from '../enumerator-session-state.service';
+import { feature } from '@turf/turf';
 
 @Component({
     selector: 'app-enumerator-load-building',
@@ -67,7 +68,7 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
 
     defaultPlotStyle = {
         weight: 1,
-        color: 'red',
+        color: 'white',
         fillColor: 'transparent',
         fillOpacity: 0.5,
     };
@@ -176,8 +177,18 @@ export class EnumeratorLoadBuildingComponent implements OnInit {
             this.buildingGeojson = L.geoJSON(
                 buildings as GeoJSON.GeoJsonObject,
                 {
-                    style: () => this.defaultBuildingStyle,
+                    style: (feature) => ({
+                        fillColor: 'transparent',
+                        weight: 3,
+                        opacity: 1,
+                        color:
+                            feature.properties.status === 'COMPLETE'
+                                ? 'green'
+                                : 'red',
+                    }),
+                    // style: () => this.defaultBuildingStyle,
                     onEachFeature: (feature, layer) => {
+                        console.log('Adding building layer:', feature);
                         layer.on({
                             click: (e: any) => {
                                 this.selectBuilding(feature, layer);

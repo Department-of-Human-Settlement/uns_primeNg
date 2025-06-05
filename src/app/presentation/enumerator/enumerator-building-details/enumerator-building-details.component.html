@@ -1,3 +1,4 @@
+<p-confirmDialog></p-confirmDialog>
 <div class="flex flex-column gap-2 p-3 bg-white">
     <div class="flex gap-2 mb-4">
         <p-button
@@ -20,6 +21,24 @@
                 {{ buildingDetails.typology }} Building
             </span>
         </p>
+        <p>
+            {{ buildingGeojson.status ? buildingGeojson.status : "Incomplete" }}
+        </p>
+        <div class="flex justify-content-center gap-2">
+            <p-button
+                label="Mark Complete?"
+                *ngIf="
+                    !buildingGeojson.status ||
+                    buildingGeojson.status === 'INCOMPLETE'
+                "
+                (click)="confirmMarkBuildingComplete()"
+            ></p-button>
+            <p-button
+                *ngIf="buildingGeojson.status === 'INCOMPLETE'"
+                label="Mark Incomplete?"
+                (click)="confirmMarkBuildingIncomplete()"
+            ></p-button>
+        </div>
     </div>
 </div>
 <p-tabView class="bg-white">

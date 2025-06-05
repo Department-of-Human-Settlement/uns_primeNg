@@ -1,0 +1,315 @@
+.login {
+    background: #ffffff;
+    background-image: radial-gradient(circle at 25% 25%, rgba(0, 0, 0, 0.02) 0%, transparent 40%),
+        radial-gradient(circle at 75% 75%, rgba(0, 0, 0, 0.02) 0%, transparent 40%);
+    overflow: hidden;
+    position: relative;
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::before {
+        content: "";
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0) 60%);
+        animation: rotate 30s linear infinite;
+    }
+}
+
+.login-content-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 450px;
+    margin: 2rem;
+}
+
+.login-card-container {
+    position: relative;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 2px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.animated-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.02));
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+    border-radius: 24px;
+}
+
+.login-card {
+    position: relative;
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 2rem;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    .login-logo {
+        width: auto;
+        height: 60px;
+        margin-bottom: 1.5rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .welcome-text {
+        font-size: 2rem;
+        font-weight: 600;
+        background: linear-gradient(45deg, #2c3e50, #34495e);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+        color: #7f8c8d;
+        font-size: 1rem;
+    }
+}
+
+.login-form {
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+
+        .p-float-label {
+            width: 100%;
+        }
+
+        input,
+        .p-password {
+            width: 100%;
+        }
+
+        .input-field {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+
+            &:focus {
+                border-color: #2c3e50;
+                box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+            }
+
+            &.filled {
+                border-color: #34495e;
+            }
+        }
+    }
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1.5rem 0;
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .remember-label {
+            color: #666;
+            user-select: none;
+        }
+    }
+}
+
+.login-button {
+    width: 100%;
+    padding: 1rem;
+    background: #2c3e50;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: #34495e;
+        transform: translateY(-2px);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+.welcome-back {
+    text-align: center;
+    padding: 2rem 0;
+
+    .user-welcome {
+        margin-bottom: 2rem;
+
+        .welcome-icon {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .session-info {
+            color: #7f8c8d;
+        }
+    }
+
+    .continue-button {
+        width: 100%;
+        margin-bottom: 1rem;
+        background: #2c3e50;
+        color: #ffffff;
+        border: none;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+            background: #34495e;
+        }
+    }
+
+    .switch-account {
+        color: #7f8c8d;
+        margin-top: 1rem;
+
+        .switch-link {
+            color: #2c3e50;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.3s ease;
+
+            &:hover {
+                color: #34495e;
+            }
+
+            &:hover {
+                color: #00879d;
+            }
+        }
+    }
+}
+
+.correction-link {
+    margin-top: 2rem;
+    text-align: center;
+
+    .correction-button {
+        color: rgba(255, 255, 255, 0.8);
+        transition: color 0.3s ease;
+
+        &:hover {
+            color: white;
+        }
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+// Responsive adjustments
+@media screen and (max-width: 480px) {
+    .login-content-wrapper {
+        margin: 1rem;
+    }
+
+    .login-card {
+        padding: 1.5rem;
+    }
+
+    .login-header {
+        .welcome-text {
+            font-size: 1.75rem;
+        }
+    }
+}
+
+// PrimeNG overrides
+:host ::ng-deep {
+    .p-password input {
+        width: 100%;
+    }
+
+    .p-checkbox {
+        width: 20px;
+        height: 20px;
+
+        .p-checkbox-box {
+            border-radius: 6px;
+
+            &.p-highlight {
+                background: #006a88;
+                border-color: #006a88;
+            }
+        }
+    }
+
+    .p-button {
+        &.p-button-text {
+            color: rgba(255, 255, 255, 0.8);
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
+        }
+    }
+
+    .p-toast {
+        .p-toast-message {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    }
+}

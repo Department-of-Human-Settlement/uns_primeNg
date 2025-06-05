@@ -168,4 +168,17 @@ export class BuildingDataService {
     MapBuildingQr(data: any) {
         return this.http.post(`${this.apiUrl}/building/map-qr`, data);
     }
+
+    MarkBuildingAsComplete(buildingId: number) {
+        return this.http.patch(
+            `${this.apiUrl}/building/mark/complete/geo/${buildingId}`,
+            {}
+        );
+    }
+    MarkBuildingAsIncomplete(buildingId: number) {
+        return this.http.patch(
+            `${this.apiUrl}/building/mark/incomplete/geo/${buildingId}`,
+            {}
+        );
+    }
 }
