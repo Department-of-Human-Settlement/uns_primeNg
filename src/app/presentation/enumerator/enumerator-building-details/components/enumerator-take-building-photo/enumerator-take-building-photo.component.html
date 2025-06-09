@@ -1,87 +1,221 @@
-<div class="relative">
-    <div class="relative">
-        <!-- Camera view -->
-        <video
-            #videoElement
-            autoplay
-            playsinline
-            class="w-full h-[80vh] object-cover"
-        ></video>
+<!-- Modern Camera Interface using ngx-webcam with PrimeFlex -->
+<div
+    class="fixed top-0 left-0 w-full h-full bg-black-alpha-90 overflow-hidden z-5 touch-action-manipulation select-none overscroll-none"
+>
+    <div
+        class="relative w-full h-full flex align-items-center justify-content-center overscroll-none"
+    >
+        <!-- Webcam Component -->
+        <webcam
+            *ngIf="showWebcam"
+            [trigger]="triggerObservable"
+            [nextWebcam]="nextWebcamObservable"
+            [videoOptions]="videoOptions"
+            [allowCameraSwitch]="allowCameraSwitch"
+            [mirrorImage]="false"
+            (imageCapture)="handleImage($event)"
+            (initError)="handleInitError($event)"
+            (cameraSwitched)="cameraWasSwitched($event)"
+            class="absolute top-0 left-0 w-full h-full"
+        ></webcam>
 
-        <!-- Camera loading state -->
+        <!-- Camera UI Overlay using PrimeFlex -->
         <div
-            *ngIf="!isCameraReady"
-            class="absolute inset-0 flex flex-column justify-content-center align-items-center bg-black-alpha-50"
+            *ngIf="showWebcam"
+            class="relative w-full h-full flex flex-column justify-content-between pointer-events-none z-1 p-3"
         >
-            <p-progressSpinner strokeWidth="4" />
-            <span class="text-white mt-3">Initializing camera...</span>
+            <!-- Top Controls Bar -->
+            <div
+                class="flex justify-content-between align-items-start w-full flex-shrink-0 pointer-events-auto"
+            >
+                <!-- Keyboard Shortcuts Help -->
+                <div
+                    class="bg-black-alpha-70 text-white border-round-xl p-3 text-sm backdrop-blur max-w-12rem flex-shrink-0"
+                >
+                    <div class="mb-1"><strong>Mobile Controls:</strong></div>
+                    <div class="mb-1">Tap button: Capture</div>
+                    <div class="mb-1">Double tap: Quick capture</div>
+                    <div *ngIf="multipleWebcamsAvailable" class="mb-1">
+                        Swipe: Switch Camera
+                    </div>
+                </div>
+
+                <!-- Close Button -->
+                <button
+                    pButton
+                    type="button"
+                    icon="pi pi-times"
+                    class="p-button-rounded p-button-text p-button-lg bg-black-alpha-70 text-white border-none backdrop-blur"
+                    style="
+                        width: 3rem;
+                        height: 3rem;
+                        min-width: 44px;
+                        min-height: 44px;
+                    "
+                    (click)="closeModal()"
+                    pTooltip="Close Camera"
+                    tooltipPosition="bottom"
+                ></button>
+            </div>
+
+            <!-- Middle Area (expandable space) -->
+            <div class="flex-1"></div>
+
+            <!-- Bottom Controls Bar -->
+            <div
+                class="flex justify-content-center align-items-center w-full flex-shrink-0 pt-3 pointer-events-auto"
+            >
+                <div
+                    class="flex justify-content-between align-items-center w-full max-w-25rem"
+                >
+                    <!-- Camera Switch Button -->
+                    <button
+                        *ngIf="multipleWebcamsAvailable"
+                        pButton
+                        type="button"
+                        icon="pi pi-refresh"
+                        class="p-button-rounded p-button-secondary bg-white-alpha-30 border-2 border-white-alpha-40 text-white backdrop-blur switch-btn"
+                        style="
+                            width: 3.5rem;
+                            height: 3.5rem;
+                            min-width: 44px;
+                            min-height: 44px;
+                        "
+                        (click)="switchCamera()"
+                        pTooltip="Switch Camera"
+                        tooltipPosition="top"
+                        [attr.aria-label]="'Switch Camera'"
+                    ></button>
+                    <div
+                        *ngIf="!multipleWebcamsAvailable"
+                        style="width: 3.5rem; height: 3.5rem"
+                    ></div>
+
+                    <!-- Capture Button -->
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-camera"
+                        class="p-button-rounded p-button-lg border-4 border-white shadow-4 capture-btn"
+                        style="
+                            width: 5rem;
+                            height: 5rem;
+                            background: var(--primary-color);
+                        "
+                        (click)="triggerSnapshot()"
+                        pTooltip="Take Photo"
+                        tooltipPosition="top"
+                        [attr.aria-label]="'Take Photo'"
+                    ></button>
+
+                    <!-- Spacer for symmetry -->
+                    <div style="width: 3.5rem; height: 3.5rem"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- Camera error state -->
+        <!-- Error Display -->
         <div
-            *ngIf="cameraError"
-            class="absolute inset-0 flex flex-column justify-content-center align-items-center bg-black-alpha-50"
+            *ngIf="errors.length > 0"
+            class="absolute top-0 left-0 w-full h-full bg-black-alpha-90 flex align-items-center justify-content-center z-2"
         >
-            <i class="pi pi-exclamation-circle text-6xl text-red-500 mb-3"></i>
-            <span class="text-white">{{ cameraError }}</span>
+            <div
+                class="bg-white p-4 border-round-xl text-center max-w-25rem m-3"
+            >
+                <i
+                    class="pi pi-exclamation-triangle text-6xl text-red-500 mb-3"
+                ></i>
+                <h3 class="text-xl font-semibold mb-3">Camera Error</h3>
+                <p *ngFor="let error of errors" class="mb-2">
+                    {{ error.message }}
+                </p>
+                <button
+                    pButton
+                    type="button"
+                    label="Close"
+                    class="p-button-outlined mt-3"
+                    (click)="closeModal()"
+                ></button>
+            </div>
         </div>
 
-        <!-- Camera controls -->
+        <!-- Photo Preview and Upload -->
         <div
-            class="absolute bottom-0 left-0 right-0 p-4 flex justify-content-center align-items-center bg-black-alpha-50"
+            *ngIf="capturedImageDataUrl"
+            class="fixed top-0 left-0 w-full h-full bg-black-alpha-95 z-3 flex align-items-center justify-content-center p-3"
         >
-            <button
-                *ngIf="!capturedImage"
-                pButton
-                type="button"
-                icon="pi pi-camera"
-                class="p-button-rounded p-button-lg"
-                (click)="capturePhoto()"
-            ></button>
-        </div>
+            <div
+                class="bg-white border-round-2xl overflow-hidden w-full max-w-30rem max-h-90vh flex flex-column shadow-8"
+            >
+                <!-- Preview Header -->
+                <div
+                    class="flex justify-content-between align-items-center p-3 bg-gray-50 border-bottom-1 surface-border"
+                >
+                    <h3 class="m-0 text-gray-800 font-semibold">
+                        Photo Preview
+                    </h3>
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-times"
+                        class="p-button-rounded p-button-text"
+                        (click)="closeModal()"
+                    ></button>
+                </div>
 
-        <!-- Preview and upload section -->
-        <div
-            *ngIf="capturedImage"
-            class="absolute inset-0 bg-black-alpha-90 p-4"
-        >
-            <div class="flex flex-column h-full">
-                <div class="flex-grow-1 relative">
+                <!-- Image Preview -->
+                <div
+                    class="relative flex align-items-center justify-content-center bg-black overflow-hidden"
+                    style="max-height: 60vh"
+                >
                     <img
-                        [src]="capturedImage"
-                        class="w-full h-full object-contain"
+                        [src]="capturedImageDataUrl"
+                        alt="Captured photo"
+                        class="w-full h-auto max-h-full object-fit-contain"
                     />
                 </div>
 
-                <div class="flex justify-content-center gap-3 mt-4">
+                <!-- Action Buttons -->
+                <div class="flex gap-3 p-3">
                     <button
                         pButton
                         type="button"
                         icon="pi pi-refresh"
                         label="Retake"
-                        class="p-button-outlined"
-                        (click)="capturedImage = null"
+                        class="p-button-outlined flex-1"
+                        style="min-height: 44px"
+                        (click)="retakePhoto()"
+                        [disabled]="isUploading"
                     ></button>
 
                     <button
                         pButton
                         type="button"
-                        icon="pi pi-check"
+                        icon="pi pi-upload"
                         label="Upload"
-                        [loading]="isUploading"
-                        class="p-button-success"
+                        class="p-button-success flex-1"
+                        style="min-height: 44px"
                         (click)="uploadImage()"
+                        [loading]="isUploading"
+                        [disabled]="isUploading"
                     ></button>
                 </div>
 
-                <p-progressBar
-                    *ngIf="isUploading"
-                    [value]="uploadProgress"
-                    class="mt-3"
-                ></p-progressBar>
+                <!-- Upload Progress -->
+                <div *ngIf="isUploading" class="px-3 pb-3">
+                    <p-progressBar
+                        [value]="uploadProgress"
+                        [showValue]="true"
+                        styleClass="mb-2"
+                    ></p-progressBar>
+                    <span class="block text-center text-sm text-gray-600"
+                        >Uploading... {{ uploadProgress }}%</span
+                    >
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Toast for notifications -->
 <p-toast></p-toast>

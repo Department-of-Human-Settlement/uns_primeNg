@@ -94,8 +94,8 @@ export class EnumeratorBuildingPhotosTabComponent implements OnInit {
             EnumeratorTakeBuildingPhotoComponent,
             {
                 header: 'Take Building Photo',
-                width: '100%',
-                height: '100dvh',
+                width: '90vw',
+                height: '70vh',
                 data: {
                     buildingId: this.buildingId,
                 },

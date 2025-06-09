@@ -44,7 +44,7 @@
 
     <div
         *ngIf="selectedBuilding"
-        class="p-3 absolute flex flex-column gap-2 w-full"
+        class="px-3 absolute flex flex-column gap-2 w-full"
         style="
             z-index: 9999999;
             right: 0;
@@ -55,16 +55,15 @@
             box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
             transform: translateY(0);
             transition: transform 0.3s ease-out;
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+            margin-bottom: env(safe-area-inset-bottom, 0px);
         "
     >
-        <div *ngIf="selectedPlot" class="mb-2 opacity-70">
-            <span class="text-sm"
-                >Plot ID: {{ selectedPlot.feature.properties.plotid }}</span
-            >
-        </div>
-
         <!-- Building info with modern layout -->
-        <div class="flex flex-column gap-3 p-5">
+        <div
+            class="flex flex-column gap-3 px-4 pt-3"
+            style="padding-bottom: 5rem"
+        >
             <div class="flex align-items-center justify-content-between">
                 <div>
                     <span class="text-sm text-primary font-semibold"

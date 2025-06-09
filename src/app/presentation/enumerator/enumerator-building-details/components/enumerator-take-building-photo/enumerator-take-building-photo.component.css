@@ -1,29 +1,104 @@
+/* Minimal Camera Component Styles - Essential styles not covered by PrimeFlex */
 
+/* Essential webcam video styling that can't be achieved with PrimeFlex */
+:host ::ng-deep webcam video,
+:host ::ng-deep webcam canvas,
+:host ::ng-deep .webcam-video,
+:host ::ng-deep webcam > video,
+:host ::ng-deep webcam > canvas {
+    width: 100vw !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background: #000 !important;
+    border-radius: 0 !important;
+    z-index: 1 !important;
+}
 
+/* Ensure webcam container takes full space */
+:host ::ng-deep webcam {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1 !important;
+    display: block !important;
+}
+
+/* Alternative selectors for different ngx-webcam versions */
+:host ::ng-deep .webcam-wrapper,
+:host ::ng-deep .webcam-container {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* Backdrop blur effects - not available in PrimeFlex */
+.backdrop-blur {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Touch optimizations for mobile */
+.touch-action-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.select-none {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Button hover effects for better UX */
+.capture-btn:hover,
+.capture-btn:active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease !important;
+}
+
+.switch-btn:hover {
+    transform: scale(1.05) !important;
+    transition: transform 0.2s ease !important;
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+    :host ::ng-deep webcam video {
+        height: -webkit-fill-available !important;
+        min-height: 100vh !important;
+    }
+}
+
+/* Prevent overscroll bounce */
+.overscroll-none {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* PrimeNG component overrides for mobile optimization */
 :host ::ng-deep {
     .p-progressbar {
-        height: 0.5rem;
-        background: rgba(255, 255, 255, 0.2);
+        height: 0.75rem;
+        border-radius: 6px;
     }
-
-    .p-progressbar .p-progressbar-value {
-        background: var(--primary-color);
+    
+    .p-button.p-button-rounded {
+        transition: all 0.2s ease;
     }
-
-    .p-button.p-button-lg {
-        width: 4rem;
-        height: 4rem;
-        
-        .p-button-icon {
-            font-size: 1.5rem;
-        }
-    }
-
-    .p-button.p-button-plain {
-        color: #fff;
-        
-        &:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
+    
+    .p-toast {
+        z-index: 9999;
     }
 }
