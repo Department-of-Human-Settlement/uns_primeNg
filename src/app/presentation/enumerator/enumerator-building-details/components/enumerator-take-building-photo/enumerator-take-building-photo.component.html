@@ -44,11 +44,12 @@
         <button
             *ngIf="!capturedImage && canSwitchCamera"
             type="button"
-            class="switch-camera-button"
+            class="capture-button"
             (click)="switchCamera()"
             title="Switch Camera"
         >
             <i class="pi pi-refresh"></i>
+            <p>Switch Camera</p>
         </button>
 
         <!-- Capture Button -->
