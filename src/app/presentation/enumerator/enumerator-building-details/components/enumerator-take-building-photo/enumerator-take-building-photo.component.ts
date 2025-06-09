@@ -42,6 +42,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
     public deviceId: string = '';
     public videoOptions: MediaTrackConstraints = {};
     public errors: WebcamInitError[] = [];
+    public currentFacingMode: 'user' | 'environment' = 'environment';
 
     // Captured image
     public webcamImage: WebcamImage | null = null;
@@ -82,7 +83,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
             width: { ideal: 1280, max: 1920, min: 640 },
             height: { ideal: 720, max: 1080, min: 480 },
             aspectRatio: { ideal: 16 / 9, min: 4 / 3, max: 21 / 9 },
-            facingMode: 'environment', // Start with back camera on mobile
+            facingMode: this.currentFacingMode, // Start with back camera on mobile
             frameRate: { ideal: 30, max: 60 },
         };
 
@@ -159,7 +160,36 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
 
     // Switch between front and back camera
     public switchCamera(): void {
-        this.showNextWebcam(true);
+        // Toggle between front and back camera for mobile
+        this.currentFacingMode =
+            this.currentFacingMode === 'environment' ? 'user' : 'environment';
+
+        // Update video options with new facing mode
+        this.videoOptions = {
+            ...this.videoOptions,
+            facingMode: this.currentFacingMode,
+        };
+
+        // Restart webcam with new constraints
+        this.restartWebcam();
+
+        // Show feedback to user
+        const cameraType =
+            this.currentFacingMode === 'environment' ? 'Back' : 'Front';
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Camera Switched',
+            detail: `Switched to ${cameraType} Camera`,
+            life: 2000,
+        });
+    }
+
+    // Restart webcam with new video options
+    private restartWebcam(): void {
+        this.showWebcam = false;
+        setTimeout(() => {
+            this.showWebcam = true;
+        }, 100);
     }
 
     // Retake photo
@@ -319,12 +349,6 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         ) {
             if (this.multipleWebcamsAvailable) {
                 this.switchCamera();
-                this.messageService.add({
-                    severity: 'info',
-                    summary: 'Camera Switched',
-                    detail: 'Swipe detected - camera switched!',
-                    life: 2000,
-                });
             }
         }
 
