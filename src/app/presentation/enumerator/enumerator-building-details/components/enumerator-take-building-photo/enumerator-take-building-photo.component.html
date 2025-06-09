@@ -35,7 +35,12 @@
                     <div class="mb-1"><strong>Mobile Controls:</strong></div>
                     <div class="mb-1">Tap button: Capture</div>
                     <div class="mb-1">Double tap: Quick capture</div>
-                    <div *ngIf="multipleWebcamsAvailable" class="mb-1">
+                    <div
+                        *ngIf="
+                            multipleWebcamsAvailable || hasFrontAndBackCamera
+                        "
+                        class="mb-1"
+                    >
                         Swipe: Switch Camera
                     </div>
                 </div>
@@ -70,7 +75,9 @@
                 >
                     <!-- Camera Switch Button -->
                     <button
-                        *ngIf="multipleWebcamsAvailable"
+                        *ngIf="
+                            multipleWebcamsAvailable || hasFrontAndBackCamera
+                        "
                         pButton
                         type="button"
                         icon="pi pi-refresh"
@@ -87,7 +94,9 @@
                         [attr.aria-label]="'Switch Camera'"
                     ></button>
                     <div
-                        *ngIf="!multipleWebcamsAvailable"
+                        *ngIf="
+                            !multipleWebcamsAvailable && !hasFrontAndBackCamera
+                        "
                         style="width: 3.5rem; height: 3.5rem"
                     ></div>
 

@@ -39,6 +39,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
     public showWebcam = true;
     public allowCameraSwitch = true;
     public multipleWebcamsAvailable = false;
+    public hasFrontAndBackCamera = false; // For mobile devices with facing mode support
     public deviceId: string = '';
     public videoOptions: MediaTrackConstraints = {};
     public errors: WebcamInitError[] = [];
@@ -83,7 +84,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
             width: { ideal: 1280, max: 1920, min: 640 },
             height: { ideal: 720, max: 1080, min: 480 },
             aspectRatio: { ideal: 16 / 9, min: 4 / 3, max: 21 / 9 },
-            facingMode: this.currentFacingMode, // Start with back camera on mobile
+            facingMode: { exact: this.currentFacingMode }, // Use exact constraint for better switching
             frameRate: { ideal: 30, max: 60 },
         };
 
@@ -91,6 +92,15 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
             (mediaDevices: MediaDeviceInfo[]) => {
                 this.multipleWebcamsAvailable =
                     mediaDevices && mediaDevices.length > 1;
+
+                // Check if device supports both front and back cameras
+                // Most mobile devices support facingMode even with single video input
+                this.checkFacingModeSupport();
+
+                // For mobile devices, assume facing mode support is available
+                if (this.isMobileDevice() && !this.multipleWebcamsAvailable) {
+                    this.hasFrontAndBackCamera = true;
+                }
             }
         );
     }
@@ -115,6 +125,33 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
     }
 
     public handleInitError(error: WebcamInitError): void {
+        console.error('Camera initialization error:', error);
+
+        // If exact facingMode fails, try with ideal facingMode
+        if (
+            error.message.includes('facingMode') ||
+            error.message.includes('OverconstrainedError')
+        ) {
+            console.log(
+                'Exact facingMode failed, trying with ideal constraint'
+            );
+
+            this.videoOptions = {
+                width: { ideal: 1280, max: 1920, min: 640 },
+                height: { ideal: 720, max: 1080, min: 480 },
+                aspectRatio: { ideal: 16 / 9, min: 4 / 3, max: 21 / 9 },
+                facingMode: this.currentFacingMode, // Use ideal instead of exact
+                frameRate: { ideal: 30, max: 60 },
+            };
+
+            // Restart webcam with relaxed constraints
+            setTimeout(() => {
+                this.restartWebcam();
+            }, 500);
+
+            return;
+        }
+
         this.errors.push(error);
         this.messageService.add({
             severity: 'error',
@@ -158,16 +195,38 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         return this.nextWebcam.asObservable();
     }
 
+    // Get current camera type for UI display
+    public get currentCameraType(): string {
+        return this.currentFacingMode === 'environment'
+            ? 'Back Camera'
+            : 'Front Camera';
+    }
+
+    // Check if camera switching is available
+    public get canSwitchCamera(): boolean {
+        return this.multipleWebcamsAvailable || this.hasFrontAndBackCamera;
+    }
+
     // Switch between front and back camera
     public switchCamera(): void {
+        console.log('Current facing mode:', this.currentFacingMode);
+
         // Toggle between front and back camera for mobile
-        this.currentFacingMode =
+        const newFacingMode =
             this.currentFacingMode === 'environment' ? 'user' : 'environment';
 
-        // Update video options with new facing mode
+        console.log('Switching to facing mode:', newFacingMode);
+
+        // Update current facing mode
+        this.currentFacingMode = newFacingMode;
+
+        // Update video options with exact facing mode constraint
         this.videoOptions = {
-            ...this.videoOptions,
-            facingMode: this.currentFacingMode,
+            width: { ideal: 1280, max: 1920, min: 640 },
+            height: { ideal: 720, max: 1080, min: 480 },
+            aspectRatio: { ideal: 16 / 9, min: 4 / 3, max: 21 / 9 },
+            facingMode: { exact: this.currentFacingMode }, // Use exact constraint
+            frameRate: { ideal: 30, max: 60 },
         };
 
         // Restart webcam with new constraints
@@ -190,6 +249,53 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         setTimeout(() => {
             this.showWebcam = true;
         }, 100);
+    }
+
+    // Check if device supports both front and back cameras
+    private async checkFacingModeSupport(): Promise<void> {
+        try {
+            // Test if both facing modes are supported
+            const constraints = {
+                video: {
+                    facingMode: { exact: 'environment' },
+                },
+            };
+
+            const backCameraStream = await navigator.mediaDevices.getUserMedia(
+                constraints
+            );
+            backCameraStream.getTracks().forEach((track) => track.stop());
+
+            const frontConstraints = {
+                video: {
+                    facingMode: { exact: 'user' },
+                },
+            };
+
+            const frontCameraStream = await navigator.mediaDevices.getUserMedia(
+                frontConstraints
+            );
+            frontCameraStream.getTracks().forEach((track) => track.stop());
+
+            // If both succeed, device has front and back cameras
+            this.hasFrontAndBackCamera = true;
+        } catch (error) {
+            // If either fails, we'll rely on multipleWebcamsAvailable
+            this.hasFrontAndBackCamera = false;
+            console.warn('Facing mode detection failed:', error);
+        }
+    }
+
+    // Detect if device is mobile
+    private isMobileDevice(): boolean {
+        const userAgent = navigator.userAgent.toLowerCase();
+        return (
+            /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/.test(
+                userAgent
+            ) ||
+            window.innerWidth <= 768 ||
+            'ontouchstart' in window
+        );
     }
 
     // Retake photo
@@ -288,10 +394,10 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
             if (event.key === ' ' || event.key === 'Enter') {
                 this.triggerSnapshot();
             }
-            // C: Switch camera (if multiple cameras available)
+            // C: Switch camera (if multiple cameras available or facing mode supported)
             else if (
                 (event.key === 'c' || event.key === 'C') &&
-                this.multipleWebcamsAvailable
+                (this.multipleWebcamsAvailable || this.hasFrontAndBackCamera)
             ) {
                 this.switchCamera();
             }
@@ -347,7 +453,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
             Math.abs(deltaX) > minSwipeDistance &&
             Math.abs(deltaX) > Math.abs(deltaY)
         ) {
-            if (this.multipleWebcamsAvailable) {
+            if (this.multipleWebcamsAvailable || this.hasFrontAndBackCamera) {
                 this.switchCamera();
             }
         }
