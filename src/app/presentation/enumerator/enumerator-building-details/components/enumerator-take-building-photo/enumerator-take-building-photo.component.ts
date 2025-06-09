@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import {
+    Component,
+    OnInit,
+    OnDestroy,
+    ViewChild,
+    ElementRef,
+    HostListener,
+} from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -8,13 +15,6 @@ import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TooltipModule } from 'primeng/tooltip';
-import {
-    WebcamImage,
-    WebcamInitError,
-    WebcamModule,
-    WebcamUtil,
-} from 'ngx-webcam';
-import { Observable, Subject } from 'rxjs';
 import { BuildingDataService } from 'src/app/core/services/building.dataservice';
 
 @Component({
@@ -30,38 +30,27 @@ import { BuildingDataService } from 'src/app/core/services/building.dataservice'
         ProgressSpinnerModule,
         ProgressBarModule,
         TooltipModule,
-        WebcamModule,
     ],
     providers: [MessageService],
 })
 export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
-    // Camera configuration
-    public showWebcam = true;
-    public allowCameraSwitch = true;
-    public multipleWebcamsAvailable = false;
-    public hasFrontAndBackCamera = false; // For mobile devices with facing mode support
-    public deviceId: string = '';
-    public videoOptions: MediaTrackConstraints = {};
-    public errors: WebcamInitError[] = [];
+    @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
+    capturedImage: string | null = null;
+    buildingId: string = '';
+    errorMessage: string | null = null;
+
+    // Camera state
+    public stream: MediaStream | null = null;
+    public canSwitchCamera = false;
     public currentFacingMode: 'user' | 'environment' = 'environment';
 
     // Captured image
-    public webcamImage: WebcamImage | null = null;
-    public capturedImageDataUrl: string | null = null;
 
     // Upload state
     public isUploading = false;
     public uploadProgress = 0;
 
     // Building ID from dialog config
-    public buildingId: number;
-
-    // Trigger for photo capture
-    private trigger: Subject<void> = new Subject<void>();
-    // Switch camera
-    private nextWebcam: Subject<boolean | string> = new Subject<
-        boolean | string
-    >();
 
     constructor(
         private buildingService: BuildingDataService,
@@ -79,30 +68,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         document.body.style.width = '100%';
         document.body.style.height = '100%';
 
-        // Set mobile-optimized video options with aspect ratio constraints
-        this.videoOptions = {
-            width: { ideal: 1280, max: 1920, min: 640 },
-            height: { ideal: 720, max: 1080, min: 480 },
-            aspectRatio: { ideal: 16 / 9, min: 4 / 3, max: 21 / 9 },
-            facingMode: { exact: this.currentFacingMode }, // Use exact constraint for better switching
-            frameRate: { ideal: 30, max: 60 },
-        };
-
-        WebcamUtil.getAvailableVideoInputs().then(
-            (mediaDevices: MediaDeviceInfo[]) => {
-                this.multipleWebcamsAvailable =
-                    mediaDevices && mediaDevices.length > 1;
-
-                // Check if device supports both front and back cameras
-                // Most mobile devices support facingMode even with single video input
-                this.checkFacingModeSupport();
-
-                // For mobile devices, assume facing mode support is available
-                if (this.isMobileDevice() && !this.multipleWebcamsAvailable) {
-                    this.hasFrontAndBackCamera = true;
-                }
-            }
-        );
+        this.startCamera();
     }
 
     public ngOnDestroy(): void {
@@ -112,127 +78,58 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         document.body.style.width = '';
         document.body.style.height = '';
 
-        this.trigger.complete();
-        this.nextWebcam.complete();
+        this.stopCamera();
     }
 
-    public triggerSnapshot(): void {
-        this.trigger.next();
-    }
+    public async startCamera(): Promise<void> {
+        try {
+            this.errorMessage = null;
 
-    public toggleWebcam(): void {
-        this.showWebcam = !this.showWebcam;
-    }
-
-    public handleInitError(error: WebcamInitError): void {
-        console.error('Camera initialization error:', error);
-
-        // If exact facingMode fails, try with ideal facingMode
-        if (
-            error.message.includes('facingMode') ||
-            error.message.includes('OverconstrainedError')
-        ) {
-            console.log(
-                'Exact facingMode failed, trying with ideal constraint'
+            // Check if we can switch cameras by getting available devices
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(
+                (device) => device.kind === 'videoinput'
             );
+            this.canSwitchCamera = videoDevices.length > 1;
 
-            this.videoOptions = {
-                width: { ideal: 1280, max: 1920, min: 640 },
-                height: { ideal: 720, max: 1080, min: 480 },
-                aspectRatio: { ideal: 16 / 9, min: 4 / 3, max: 21 / 9 },
-                facingMode: this.currentFacingMode, // Use ideal instead of exact
-                frameRate: { ideal: 30, max: 60 },
+            const constraints: MediaStreamConstraints = {
+                video: {
+                    facingMode: this.currentFacingMode,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                },
+                audio: false,
             };
 
-            // Restart webcam with relaxed constraints
-            setTimeout(() => {
-                this.restartWebcam();
-            }, 500);
+            this.stream = await navigator.mediaDevices.getUserMedia(
+                constraints
+            );
 
-            return;
+            if (this.videoElement) {
+                this.videoElement.nativeElement.srcObject = this.stream;
+            }
+        } catch (error: any) {
+            console.error('Error starting camera:', error);
+            this.errorMessage = this.getErrorMessage(error);
         }
-
-        this.errors.push(error);
-        this.messageService.add({
-            severity: 'error',
-            summary: 'Camera Error',
-            detail: `Failed to initialize camera: ${error.message}`,
-        });
     }
 
-    public showNextWebcam(directionOrDeviceId: boolean | string): void {
-        this.nextWebcam.next(directionOrDeviceId);
+    public stopCamera(): void {
+        if (this.stream) {
+            this.stream.getTracks().forEach((track) => track.stop());
+            this.stream = null;
+        }
     }
 
-    public handleImage(webcamImage: WebcamImage): void {
-        this.webcamImage = webcamImage;
-        this.capturedImageDataUrl = webcamImage.imageAsDataUrl;
-        this.showWebcam = false;
+    public async switchCamera(): Promise<void> {
+        if (!this.canSwitchCamera) return;
 
-        this.messageService.add({
-            severity: 'success',
-            summary: 'Photo Captured',
-            detail: 'Photo captured successfully!',
-            life: 2000,
-        });
-    }
-
-    public cameraWasSwitched(deviceId: string): void {
-        this.deviceId = deviceId;
-        this.messageService.add({
-            severity: 'info',
-            summary: 'Camera Switched',
-            detail: 'Camera switched successfully!',
-            life: 2000,
-        });
-    }
-
-    public get triggerObservable(): Observable<void> {
-        return this.trigger.asObservable();
-    }
-
-    public get nextWebcamObservable(): Observable<boolean | string> {
-        return this.nextWebcam.asObservable();
-    }
-
-    // Get current camera type for UI display
-    public get currentCameraType(): string {
-        return this.currentFacingMode === 'environment'
-            ? 'Back Camera'
-            : 'Front Camera';
-    }
-
-    // Check if camera switching is available
-    public get canSwitchCamera(): boolean {
-        return this.multipleWebcamsAvailable || this.hasFrontAndBackCamera;
-    }
-
-    // Switch between front and back camera
-    public switchCamera(): void {
-        console.log('Current facing mode:', this.currentFacingMode);
-
-        // Toggle between front and back camera for mobile
-        const newFacingMode =
+        this.currentFacingMode =
             this.currentFacingMode === 'environment' ? 'user' : 'environment';
 
-        console.log('Switching to facing mode:', newFacingMode);
+        this.stopCamera();
+        await this.startCamera();
 
-        // Update current facing mode
-        this.currentFacingMode = newFacingMode;
-
-        // Update video options with exact facing mode constraint
-        this.videoOptions = {
-            width: { ideal: 1280, max: 1920, min: 640 },
-            height: { ideal: 720, max: 1080, min: 480 },
-            aspectRatio: { ideal: 16 / 9, min: 4 / 3, max: 21 / 9 },
-            facingMode: { exact: this.currentFacingMode }, // Use exact constraint
-            frameRate: { ideal: 30, max: 60 },
-        };
-
-        // Restart webcam with new constraints
-        this.restartWebcam();
-
-        // Show feedback to user
         const cameraType =
             this.currentFacingMode === 'environment' ? 'Back' : 'Front';
         this.messageService.add({
@@ -243,71 +140,36 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         });
     }
 
-    // Restart webcam with new video options
-    private restartWebcam(): void {
-        this.showWebcam = false;
-        setTimeout(() => {
-            this.showWebcam = true;
-        }, 100);
+    public capturePhoto(): void {
+        if (!this.videoElement || !this.stream) return;
+
+        const video = this.videoElement.nativeElement;
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        if (!context) return;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+
+        this.capturedImage = canvas.toDataURL('image/png');
+
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Photo Captured',
+            detail: 'Photo captured successfully!',
+            life: 2000,
+        });
     }
 
-    // Check if device supports both front and back cameras
-    private async checkFacingModeSupport(): Promise<void> {
-        try {
-            // Test if both facing modes are supported
-            const constraints = {
-                video: {
-                    facingMode: { exact: 'environment' },
-                },
-            };
-
-            const backCameraStream = await navigator.mediaDevices.getUserMedia(
-                constraints
-            );
-            backCameraStream.getTracks().forEach((track) => track.stop());
-
-            const frontConstraints = {
-                video: {
-                    facingMode: { exact: 'user' },
-                },
-            };
-
-            const frontCameraStream = await navigator.mediaDevices.getUserMedia(
-                frontConstraints
-            );
-            frontCameraStream.getTracks().forEach((track) => track.stop());
-
-            // If both succeed, device has front and back cameras
-            this.hasFrontAndBackCamera = true;
-        } catch (error) {
-            // If either fails, we'll rely on multipleWebcamsAvailable
-            this.hasFrontAndBackCamera = false;
-            console.warn('Facing mode detection failed:', error);
-        }
-    }
-
-    // Detect if device is mobile
-    private isMobileDevice(): boolean {
-        const userAgent = navigator.userAgent.toLowerCase();
-        return (
-            /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/.test(
-                userAgent
-            ) ||
-            window.innerWidth <= 768 ||
-            'ontouchstart' in window
-        );
-    }
-
-    // Retake photo
     public retakePhoto(): void {
-        this.webcamImage = null;
-        this.capturedImageDataUrl = null;
-        this.showWebcam = true;
+        this.capturedImage = null;
+        this.startCamera();
     }
 
-    // Upload the captured image
     public async uploadImage(): Promise<void> {
-        if (!this.webcamImage) {
+        if (!this.capturedImage) {
             this.messageService.add({
                 severity: 'warn',
                 summary: 'No Image',
@@ -321,7 +183,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
 
         try {
             // Convert base64 to blob
-            const blob = this.dataURItoBlob(this.webcamImage.imageAsDataUrl);
+            const blob = this.dataURItoBlob(this.capturedImage);
             const file = new File([blob], 'captured-image.png', {
                 type: 'image/png',
             });
@@ -338,7 +200,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
             }, 200);
 
             await this.buildingService
-                .CreateBuildingImage(formData, this.buildingId)
+                .CreateBuildingImage(formData, Number(this.buildingId))
                 .toPromise();
 
             clearInterval(progressInterval);
@@ -364,7 +226,6 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         }
     }
 
-    // Close the dialog
     public closeModal(): void {
         // Restore body scrolling before closing
         document.body.style.overflow = '';
@@ -372,7 +233,22 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         document.body.style.width = '';
         document.body.style.height = '';
 
+        this.stopCamera();
         this.ref.close();
+    }
+
+    private getErrorMessage(error: any): string {
+        if (error.name === 'NotAllowedError') {
+            return 'Camera access was denied. Please allow camera permissions and try again.';
+        } else if (error.name === 'NotFoundError') {
+            return 'No camera found on this device.';
+        } else if (error.name === 'NotSupportedError') {
+            return 'Camera is not supported on this device.';
+        } else if (error.name === 'OverconstrainedError') {
+            return 'Camera constraints could not be satisfied. Trying with basic settings...';
+        } else {
+            return 'An error occurred while accessing the camera. Please try again.';
+        }
     }
 
     // Keyboard event handling
@@ -389,21 +265,21 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         }
 
         // Only handle keyboard events when webcam is visible (not in preview mode)
-        if (this.showWebcam) {
+        if (!this.capturedImage) {
             // Space or Enter: Take photo
             if (event.key === ' ' || event.key === 'Enter') {
-                this.triggerSnapshot();
+                this.capturePhoto();
             }
-            // C: Switch camera (if multiple cameras available or facing mode supported)
+            // C: Switch camera (if multiple cameras available)
             else if (
                 (event.key === 'c' || event.key === 'C') &&
-                (this.multipleWebcamsAvailable || this.hasFrontAndBackCamera)
+                this.canSwitchCamera
             ) {
                 this.switchCamera();
             }
         }
         // Handle keyboard events in preview mode
-        else if (this.capturedImageDataUrl) {
+        else if (this.capturedImage) {
             // R: Retake photo
             if (event.key === 'r' || event.key === 'R') {
                 this.retakePhoto();
@@ -438,7 +314,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
 
     @HostListener('touchend', ['$event'])
     onTouchEnd(event: TouchEvent): void {
-        if (!this.showWebcam || event.changedTouches.length !== 1) return;
+        if (this.capturedImage || event.changedTouches.length !== 1) return;
 
         const touchEndY = event.changedTouches[0].clientY;
         const touchEndX = event.changedTouches[0].clientX;
@@ -453,7 +329,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
             Math.abs(deltaX) > minSwipeDistance &&
             Math.abs(deltaX) > Math.abs(deltaY)
         ) {
-            if (this.multipleWebcamsAvailable || this.hasFrontAndBackCamera) {
+            if (this.canSwitchCamera) {
                 this.switchCamera();
             }
         }
@@ -465,7 +341,7 @@ export class EnumeratorTakeBuildingPhotoComponent implements OnInit, OnDestroy {
         if (tapLength < 500 && tapLength > 0) {
             // Double tap detected - capture photo
             event.preventDefault();
-            this.triggerSnapshot();
+            this.capturePhoto();
             this.messageService.add({
                 severity: 'success',
                 summary: 'Photo Captured',
