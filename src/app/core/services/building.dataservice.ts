@@ -165,6 +165,12 @@ export class BuildingDataService {
         );
     }
 
+    GetBuildingByQr(qrUuid: string) {
+        return this.http.get<BuildingDTO>(
+            `${this.apiUrl}/building/qr/${qrUuid}`
+        );
+    }
+
     MapBuildingQr(data: any) {
         return this.http.post(`${this.apiUrl}/building/map-qr`, data);
     }

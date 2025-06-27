@@ -146,4 +146,7 @@ export class LoginComponent implements OnInit {
     navigateToBuildingInformationCorrectionPage() {
         this.router.navigate(['/public']);
     }
+    navigateToQrCodeScan() {
+        this.router.navigate(['/public/scan']);
+    }
 }

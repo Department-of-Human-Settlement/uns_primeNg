@@ -66,6 +66,10 @@ export class UnitDataService {
         return this.http.get(`${this.apiUrl}/unit/validate-qr/${qrUuid}`);
     }
 
+    GetUnitByQr(qrUuid: string) {
+        return this.http.get<UnitDto>(`${this.apiUrl}/unit/qr/${qrUuid}`);
+    }
+
     MapUnitQr(data: any) {
         return this.http.post(`${this.apiUrl}/unit/map-qr`, data);
     }

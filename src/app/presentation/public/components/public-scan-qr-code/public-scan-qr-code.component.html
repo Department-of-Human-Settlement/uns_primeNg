@@ -1,0 +1,214 @@
+<!-- QR Code Scanner Component -->
+<div class="h-screen w-screen flex flex-column">
+    <!-- Scanner Instructions -->
+    <div
+        *ngIf="!buildingFound && !unitFound && !invalidQr"
+        class="flex flex-column align-items-center text-center p-4 bg-gray-100"
+    >
+        <div class="w-full max-w-md">
+            <p class="text-xl font-bold text-primary mb-2">Scan QR Code</p>
+            <p class="text-sm text-600">
+                Scan the QR code pasted onto the building or units to view
+                details
+            </p>
+        </div>
+    </div>
+
+    <!-- Camera Scanner -->
+    <div
+        *ngIf="isScanning && !buildingFound && !unitFound && !invalidQr"
+        class="flex-1 relative"
+    >
+        <zxing-scanner
+            #scanner
+            [enable]="true"
+            [device]="currentDevice"
+            (scanSuccess)="handleQrCodeResult($event)"
+            (camerasFound)="onCamerasFound($event)"
+            (permissionResponse)="onPermissionResponse($event)"
+            class="w-full h-full"
+        ></zxing-scanner>
+
+        <!-- Camera Controls -->
+        <div
+            *ngIf="availableDevices.length > 1"
+            class="absolute bottom-4 right-4"
+        >
+            <p-button
+                icon="pi pi-refresh"
+                severity="secondary"
+                size="small"
+                [rounded]="true"
+                (click)="switchCamera()"
+                pTooltip="Switch Camera"
+            ></p-button>
+        </div>
+    </div>
+
+    <!-- Building Details -->
+    <div
+        *ngIf="buildingFound"
+        class="flex-1 flex flex-column align-items-center justify-content-center p-6"
+    >
+        <!-- Building ID -->
+        <div class="text-center mb-4">
+            <p class="text-4xl font-bold text-primary">{{ building.id }}</p>
+            <p class="text-sm text-600">Building ID</p>
+        </div>
+
+        <!-- QR Code Display -->
+        <div *ngIf="building.qrUuid" class="mb-4">
+            <qrcode
+                [qrdata]="building.qrUuid"
+                [allowEmptyString]="true"
+                [cssClass]="'center'"
+                [errorCorrectionLevel]="'H'"
+                [colorDark]="'#7AADA6'"
+                [colorLight]="'#FFFFFF00'"
+                [elementType]="'svg'"
+                [scale]="1"
+                [title]="'Building QR'"
+                [width]="200"
+            ></qrcode>
+        </div>
+
+        <!-- Building Details -->
+        <div class="text-center flex flex-column align-items-center max-w-md">
+            <p-card class="w-full">
+                <div class="flex flex-column gap-2">
+                    <div *ngIf="building.address" class="text-center">
+                        <p class="text-lg font-semibold text-900">
+                            {{ building.address }}
+                        </p>
+                        <p class="text-sm text-600">Building Address</p>
+                    </div>
+
+                    <div *ngIf="!building.address" class="text-center">
+                        <p class="text-lg text-500">
+                            Building address not assigned
+                        </p>
+                    </div>
+                </div>
+            </p-card>
+
+            <!-- Location Button -->
+            <div *ngIf="building.lat && building.lng" class="mt-3">
+                <p-button
+                    label="View on Google Maps"
+                    icon="pi pi-map-marker"
+                    severity="info"
+                    size="small"
+                    [outlined]="true"
+                    (click)="openLocationOnGoogle()"
+                ></p-button>
+            </div>
+        </div>
+
+        <!-- Rescan Button -->
+        <div class="mt-4">
+            <p-button
+                label="Rescan"
+                icon="pi pi-refresh"
+                severity="secondary"
+                (click)="rescan()"
+            ></p-button>
+        </div>
+    </div>
+
+    <!-- Unit Details -->
+    <div
+        *ngIf="unitFound"
+        class="flex-1 flex flex-column align-items-center justify-content-center p-6"
+    >
+        <!-- Unit Info Header -->
+        <div class="text-center mb-4">
+            <p class="text-sm text-600 mb-2">
+                Unit ID: {{ unit.id }} | Building ID: {{ building.id }}
+            </p>
+        </div>
+
+        <!-- Unit Number -->
+        <div class="text-center mb-4">
+            <p class="text-3xl font-bold text-primary">
+                {{ unit.unitNumberPrefix }}-{{ unit.unitNumber }}
+            </p>
+            <p class="text-sm text-600">Unit Number</p>
+        </div>
+
+        <!-- Unit QR Code -->
+        <div *ngIf="unit.qrUuid" class="mb-4">
+            <qrcode
+                [qrdata]="unit.qrUuid"
+                [allowEmptyString]="true"
+                [cssClass]="'center'"
+                [errorCorrectionLevel]="'H'"
+                [colorDark]="'#7AADA6'"
+                [colorLight]="'#FFFFFF00'"
+                [elementType]="'svg'"
+                [scale]="1"
+                [title]="'Unit QR'"
+                [width]="200"
+            ></qrcode>
+        </div>
+
+        <!-- Building Details for Unit -->
+        <div class="text-center max-w-md">
+            <p-card class="w-full">
+                <div class="flex flex-column gap-2">
+                    <div *ngIf="building.address" class="text-center">
+                        <p class="text-lg font-semibold text-900">
+                            {{ building.address }}
+                        </p>
+                        <p class="text-sm text-600">Building Address</p>
+                    </div>
+                </div>
+            </p-card>
+
+            <!-- Location Button -->
+            <div *ngIf="building.lat && building.lng" class="mt-3">
+                <p-button
+                    label="View on Google Maps"
+                    icon="pi pi-map-marker"
+                    severity="info"
+                    size="small"
+                    [outlined]="true"
+                    (click)="openLocationOnGoogle()"
+                ></p-button>
+            </div>
+        </div>
+
+        <!-- Rescan Button -->
+        <div class="mt-4">
+            <p-button
+                label="Rescan"
+                icon="pi pi-refresh"
+                severity="secondary"
+                (click)="rescan()"
+            ></p-button>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div
+        *ngIf="invalidQr"
+        class="flex-1 flex flex-column align-items-center justify-content-center p-6"
+    >
+        <div class="text-center max-w-md">
+            <i
+                class="pi pi-exclamation-triangle text-6xl text-red-500 mb-4"
+            ></i>
+            <h3 class="text-xl font-semibold mb-3 text-900">QR Code Error</h3>
+            <p class="text-600 mb-4">{{ errorMessage }}</p>
+
+            <p-button
+                label="Rescan"
+                icon="pi pi-refresh"
+                severity="secondary"
+                (click)="rescan()"
+            ></p-button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Messages -->
+<p-toast></p-toast>
