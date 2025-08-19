@@ -79,5 +79,6 @@ export class AdminAdvancedsearchComponent {
         // Capitalize the input text
         this.plotId = this.plotId.toUpperCase();
         this.plotId = this.plotId.replace(' ', '');
+        this.plotId = this.plotId.replace('|', ',');
     }
 }
