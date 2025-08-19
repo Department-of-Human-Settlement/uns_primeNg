@@ -3,33 +3,25 @@
 <p-card class="w-4" *ngIf="units?.length">
     <ng-template pTemplate="header">
         <div class="flex justify-content-between align-item-end pt-4 pr-4 pl-4">
-            <p class="text-gray-700 text-xl font-semibold">Units I</p>
-            <p-button
-                icon="pi pi-plus"
-                size="small"
-                (onClick)="addUnit()"
-            ></p-button>
+            <p class="text-gray-700 text-xl font-semibold">Units</p>
+            <p-button icon="pi pi-plus" size="small" (onClick)="addUnit()"></p-button>
+        </div>
+        <div class="flex justify-content-between align-item-end pt-4 pr-4 pl-4">
+            <p class="text-gray-700 text-lg font-semibold">Units Rented: {{noUnitsRented}}</p>
+            <p class="text-gray-700 text-lg font-semibold">Units Self-Occupied: {{noUnitsSelfOccupied}}</p>
         </div>
     </ng-template>
 
     <div *ngIf="buildingOwnerships?.length">
         Building Ownership
-        <p
-            *ngFor="let ownership of buildingOwnerships; index as i"
-            class="text-sm"
-        >
+        <p *ngFor="let ownership of buildingOwnerships; index as i" class="text-sm">
             {{ i + 1 }}. {{ ownership.type }} Ownership,
             {{ ownership.ownershipPercentage }} %, {{ ownership.owner.cid }},
             {{ ownership.owner.name }}
         </p>
     </div>
 
-    <p-table
-        [value]="units"
-        [scrollable]="true"
-        rowGroupMode="subheader"
-        groupRowsBy="unitNumberPrefix"
-    >
+    <p-table [value]="units" [scrollable]="true" rowGroupMode="subheader" groupRowsBy="unitNumberPrefix">
         <ng-template pTemplate="header">
             <tr>
                 <th>QR</th>
@@ -51,52 +43,24 @@
         <ng-template pTemplate="body" let-unit let-rowIndex="rowIndex">
             <tr>
                 <td class="flex flex-column align-items-center">
-                    <qrcode
-                        *ngIf="unit?.qrUuid"
-                        [qrdata]="getQr(unit?.qrUuid)"
-                        [errorCorrectionLevel]="'M'"
-                        [allowEmptyString]="true"
-                        [cssClass]="'center'"
-                        [errorCorrectionLevel]="'high'"
-                        [colorDark]="'#111827'"
-                        [colorLight]="'#FFFFFF00'"
-                        [elementType]="'svg'"
-                        [errorCorrectionLevel]="'H'"
-                        [scale]="1"
-                        [title]="'BuildingQr'"
-                        [width]="30"
-                    ></qrcode>
+                    <qrcode *ngIf="unit?.qrUuid" [qrdata]="getQr(unit?.qrUuid)" [errorCorrectionLevel]="'M'"
+                        [allowEmptyString]="true" [cssClass]="'center'" [errorCorrectionLevel]="'high'"
+                        [colorDark]="'#111827'" [colorLight]="'#FFFFFF00'" [elementType]="'svg'"
+                        [errorCorrectionLevel]="'H'" [scale]="1" [title]="'BuildingQr'" [width]="30"></qrcode>
 
-                    <button
-                        *ngIf="!unit.qrUuid"
-                        pButton
-                        class="p-button-rounded p-button-text p-button-sm"
-                        (click)="startQrScan(unit)"
-                        label="Map QR"
-                        aria-label="Scan QR"
-                    ></button>
-                    <button
-                        *ngIf="unit.qrUuid"
-                        pButton
-                        class="p-button-rounded p-button-text p-button-sm p-button-danger"
-                        (click)="unMapQr(unit)"
-                        label="Unmap"
-                        aria-label="Unmap"
-                    ></button>
+                    <button *ngIf="!unit.qrUuid" pButton class="p-button-rounded p-button-text p-button-sm"
+                        (click)="startQrScan(unit)" label="Map QR" aria-label="Scan QR"></button>
+                    <button *ngIf="unit.qrUuid" pButton
+                        class="p-button-rounded p-button-text p-button-sm p-button-danger" (click)="unMapQr(unit)"
+                        label="Unmap" aria-label="Unmap"></button>
                 </td>
                 <td>
                     <div class="flex flex-column align-items-center">
-                        <p
-                            class="font-bold m-0 cursor-pointer"
-                            style="text-wrap: nowrap"
-                        >
+                        <p class="font-bold m-0 cursor-pointer" style="text-wrap: nowrap">
                             {{ unit?.unitNumberPrefix }}-{{ unit?.unitNumber }}
                         </p>
 
-                        <small
-                            class="text-center"
-                            *ngIf="unit.unitDetail?.name"
-                        >
+                        <small class="text-center" *ngIf="unit.unitDetail?.name">
                             {{ unit.unitDetail?.name }} <br />
                         </small>
                     </div>
@@ -116,12 +80,10 @@
 
                 <td>
                     <div *ngIf="unit.unitOwnerships?.length">
-                        <p
-                            *ngFor="
+                        <p *ngFor="
                                 let ownership of unit.unitOwnerships;
                                 index as i
-                            "
-                        >
+                            ">
                             1. {{ ownership.buildingOwnership?.owner?.cid }}
                             <br />
                             {{ ownership.buildingOwnership?.owner?.name }}
@@ -133,22 +95,12 @@
                 </td>
                 <td>
                     <div class="flex align-items-center gap-2">
-                        <button
-                            pButton
-                            type="button"
-                            icon="pi pi-pencil"
-                            class="p-button-rounded p-button-text p-button-sm"
-                            (click)="editUnit(unit)"
-                            aria-label="Edit"
-                        ></button>
-                        <button
-                            pButton
-                            type="button"
-                            icon="pi pi-trash"
-                            class="p-button-rounded p-button-text p-button-sm"
-                            (click)="deleteUnit(unit)"
-                            aria-label="Delete"
-                        ></button>
+                        <button pButton type="button" icon="pi pi-pencil"
+                            class="p-button-rounded p-button-text p-button-sm" (click)="editUnit(unit)"
+                            aria-label="Edit"></button>
+                        <button pButton type="button" icon="pi pi-trash"
+                            class="p-button-rounded p-button-text p-button-sm" (click)="deleteUnit(unit)"
+                            aria-label="Delete"></button>
                     </div>
                 </td>
             </tr>
@@ -159,12 +111,6 @@
     <div class="flex flex-column justify-content-center align-items-center">
         <img style="height: 150px; width: auto" src="assets/nodata2.png" />
         <p>No Units for BuildingID {{ buildingId }}</p>
-        <p-button
-            icon="pi pi-plus"
-            [rounded]="true"
-            [outlined]="false"
-            size="small"
-            (onClick)="addUnit()"
-        ></p-button>
+        <p-button icon="pi pi-plus" [rounded]="true" [outlined]="false" size="small" (onClick)="addUnit()"></p-button>
     </div>
 </p-card>

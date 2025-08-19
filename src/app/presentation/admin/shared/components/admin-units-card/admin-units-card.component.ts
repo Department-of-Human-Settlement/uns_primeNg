@@ -51,6 +51,8 @@ export class AdminUnitsCardComponent implements OnChanges, OnInit {
 
     ref: DynamicDialogRef | undefined;
     units: UnitDto[];
+    noUnitsRented: number = 0;
+    noUnitsSelfOccupied: number = 0;
     getBuildingFloorLabel = GETBUILDINGFLOORLABEL;
 
     buildingDetails!: BuildingDetailDto;
@@ -81,6 +83,13 @@ export class AdminUnitsCardComponent implements OnChanges, OnInit {
             .GetAllUnitsByBuilding(this.buildingId)
             .subscribe((res) => {
                 this.units = res;
+                this.units.forEach((unit) => {
+                    if ((unit as any).unitDetail?.occupancyStatus == "OwnerOccupied") {
+                        this.noUnitsSelfOccupied++;
+                    }else{
+                        this.noUnitsRented++;
+                    }
+                });
                 this.ownershipDataService
                     .GetAllBuildingOwnerships(this.buildingId)
                     .subscribe((res) => {
