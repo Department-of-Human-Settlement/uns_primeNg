@@ -399,7 +399,10 @@ export class AdminViewPlotBuildingsComponent
                         summary: 'Plot Details Found',
                         detail: 'Plot added to the map',
                     });
-                    this.getBuildingsInPlot(this.plotId);
+                    let plotIds = plotsCsv.split(',');
+                    for (let i = 0; i < plotIds.length; i++) {
+                        this.getBuildingsInPlot(plotIds[i]);
+                    }
                 } else {
                     this.messageService.add({
                         severity: 'error',
