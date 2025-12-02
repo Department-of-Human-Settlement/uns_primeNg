@@ -1,0 +1,153 @@
+<div class="container">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-wrapper">
+        <p-progressSpinner></p-progressSpinner>
+        <p>Loading plot information...</p>
+    </div>
+
+    <!-- Not Authorized State -->
+    <div *ngIf="!isAuthorized && !isLoading" class="error-wrapper">
+        <p-card>
+            <ng-template pTemplate="header">
+                <div class="error-header">
+                    <i class="pi pi-exclamation-triangle"></i>
+                    <span>Access Denied</span>
+                </div>
+            </ng-template>
+            <p class="error-text">{{ errorMessage }}</p>
+        </p-card>
+    </div>
+
+    <!-- Authorized View -->
+    <div class="main-layout">
+        <!-- Map Area -->
+        <div class="map-wrapper">
+            <div id="publicViewMap" class="map"></div>
+            
+            <!-- Legend -->
+            <div class="legend-overlay">
+                <div class="legend-header">
+                    <h4>Legend</h4>
+                </div>
+                <div class="legend-content">
+                    <div class="legend-row">
+                        <div class="legend-color-box" style="background: #fef3c7; border: 3px solid #f59e0b; opacity: 0.6;"></div>
+                        <span>Plot Boundary</span>
+                    </div>
+                    <div class="legend-row">
+                        <div class="legend-color-box" style="background: #3b82f6; border: 2px solid #1e40af; opacity: 0.7;"></div>
+                        <span>Building Boundary</span>
+                    </div>
+                    <div class="legend-divider"></div>
+                    <p class="legend-hint">Click on plot or building to view details</p>
+                </div>
+            </div>
+
+          
+        </div>
+
+        <!-- Plot Information Dialog -->
+        <p-dialog 
+            [(visible)]="plotSidebarOpen" 
+            [modal]="true"
+            [style]="{'width': isMobile ? '95vw' : '500px', 'max-height': '80vh'}"
+            [draggable]="false"
+            [resizable]="false"
+            header="Plot Information"
+            [closable]="true">
+            <div class="dialog-body">
+               <p>
+                Plot ID: {{ plotId }}
+               </p>
+
+               
+            </div>
+        </p-dialog>
+
+        <!-- Building Information Dialog -->
+        <p-dialog 
+            [(visible)]="buildingSidebarOpen" 
+            [modal]="true"
+            [style]="{'width': isMobile ? '95vw' : '700px', 'max-height': '90vh'}"
+            [draggable]="false"
+            [resizable]="false"
+            header="Building Information"
+            [closable]="true">
+            <div class="dialog-body" *ngIf="selectedBuilding">
+                <!-- Building Details -->
+                <div class="building-header-info">
+                    <div class="building-id-section">
+                        <h3>Building #{{ selectedBuilding.buildingId }}</h3>
+                    </div>
+                    <div class="building-details-grid">
+                        <div class="detail-cell">
+                            <label>Type:</label>
+                            <span>{{ selectedBuilding.type || 'N/A' }}</span>
+                        </div>
+                        <div class="detail-cell">
+                            <label>Floor Count:</label>
+                            <span>{{ selectedBuilding.floorCount || 'N/A' }}</span>
+                        </div>
+                        <div class="detail-cell">
+                            <label>Use:</label>
+                            <span>{{ selectedBuilding.use || 'N/A' }}</span>
+                        </div>
+                       
+                    </div>
+                </div>
+
+                <!-- Units Table -->
+                <div *ngIf="selectedBuilding.units && selectedBuilding.units.length > 0" class="units-table-section">
+                    <div class="units-header">
+                        <h4>
+                            <i class="pi pi-home"></i>
+                            Units ({{ selectedBuilding.units.length }})
+                        </h4>
+                    </div>
+                    <p-table 
+                        [value]="selectedBuilding.units" 
+                        [scrollable]="true"
+                        scrollHeight="400px"
+                        styleClass="p-datatable-sm units-table">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th style="width: 100px">Unit Number</th>
+                                <th>Use</th>
+                                <th style="width: 120px">Monthly Rental</th>
+                                <th style="width: 100px">Rent Source</th>
+                                <th style="width: 120px">Occupancy</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-unit>
+                            <tr>
+                                <td><strong>{{ unit.unitNumber || 'N/A' }}</strong></td>
+                                <td>{{ unit.use || 'N/A' }}</td>
+                                <td class="rental-cell">Nu {{ unit.monthlyRentalValue || 0 }}</td>
+                                <td>
+                                    <span class="badge-text">{{ unit.rentSource || 'N/A' }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge-text">{{ unit.occupancy || 'N/A' }}</span>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="5" class="text-center">No units found</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+
+                <div *ngIf="!selectedBuilding.units || selectedBuilding.units.length === 0" class="no-units">
+                    <p class="no-units-text">No units found for this building</p>
+                </div>
+            </div>
+
+            <div *ngIf="!selectedBuilding" class="empty-state">
+                <i class="pi pi-info-circle"></i>
+                <p>Click on a building to view details</p>
+            </div>
+        </p-dialog>
+    </div>
+</div>

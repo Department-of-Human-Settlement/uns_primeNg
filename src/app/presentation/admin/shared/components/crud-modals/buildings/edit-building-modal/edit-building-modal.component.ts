@@ -57,6 +57,7 @@ export class EditBuildingModalComponent implements OnInit {
     selectedBuildingExistancy: any;
     buildingName: string;
 
+    casId: string;
     buildingAssociativePositionOptions: any[];
     selectedAssociativePosition: any;
 
@@ -126,6 +127,9 @@ export class EditBuildingModalComponent implements OnInit {
     }
 
     async create() {
+        this.ref.close({
+            casId: this.casId,
+        });
         this.isButtonPressed = true;
         this.buildingDetails = {
             buildingId: this.buildingId,
@@ -159,6 +163,9 @@ export class EditBuildingModalComponent implements OnInit {
     }
 
     async update() {
+        this.ref.close({
+            casId: this.casId,
+        });
         this.buildingDetails = {
             buildingId: this.buildingId,
             existancyStatus: this.selectedBuildingExistancy,
@@ -179,6 +186,7 @@ export class EditBuildingModalComponent implements OnInit {
         if (result) {
             this.ref.close({
                 dataChanged: true,
+                casId: this.casId,
             });
         } else {
             this.isButtonPressed = false;

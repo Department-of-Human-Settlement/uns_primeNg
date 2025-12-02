@@ -1,0 +1,592 @@
+/* ============================================
+   CLEAN MONOTONE DESIGN - NO ANIMATIONS
+   ============================================ */
+
+.container {
+    width: 100%;
+    height: 100vh;
+    background: #f5f5f5;
+    overflow: hidden;
+}
+
+/* ============================================
+   TOGGLE BUTTONS
+   ============================================ */
+.plot-toggle {
+    background: #f59e0b;
+    border-color: #f59e0b;
+}
+
+.building-toggle {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+.loading-wrapper {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    background: #ffffff;
+}
+
+.loading-wrapper p {
+    margin: 0;
+    color: #495057;
+    font-size: 1rem;
+}
+
+/* ============================================
+   ERROR STATE
+   ============================================ */
+.error-wrapper {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    background: #ffffff;
+}
+
+.error-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.error-header i {
+    font-size: 1.5rem;
+}
+
+.error-text {
+    margin: 0;
+    color: #6c757d;
+}
+
+/* ============================================
+   MAIN LAYOUT
+   ============================================ */
+.main-layout {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    position: relative;
+    background: #ffffff;
+}
+
+/* ============================================
+   MAP WRAPPER
+   ============================================ */
+.map-wrapper {
+    flex: 1;
+    position: relative;
+    height: 100vh;
+    background: #e9ecef;
+}
+
+.map {
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================
+   LEGEND OVERLAY
+   ============================================ */
+.legend-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: 240px;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.legend-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    background: #f8f9fa;
+}
+
+.legend-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #212529;
+    font-weight: 600;
+}
+
+.legend-content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    color: #495057;
+}
+
+.legend-color-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.legend-divider {
+    height: 1px;
+    background: #dee2e6;
+    margin: 0.25rem 0;
+}
+
+.legend-hint {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* ============================================
+   SIDEBAR TOGGLE BUTTON
+   ============================================ */
+.sidebar-toggle {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   DIALOG
+   ============================================ */
+.dialog-body {
+    padding: 0;
+}
+
+/* ============================================
+   BUILDING DIALOG
+   ============================================ */
+.building-header-info {
+    margin-bottom: 1.5rem;
+}
+
+.building-id-section {
+    margin-bottom: 1rem;
+}
+
+.building-id-section h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #212529;
+    font-weight: 700;
+}
+
+.building-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.detail-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.detail-cell label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.detail-cell span {
+    font-size: 0.9375rem;
+    color: #212529;
+    font-weight: 600;
+}
+
+.units-table-section {
+    margin-top: 1.5rem;
+}
+
+.units-header {
+    margin-bottom: 1rem;
+}
+
+.units-header h4 {
+    margin: 0;
+    font-size: 1.125rem;
+    color: #495057;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.units-header h4 i {
+    color: #6c757d;
+}
+
+.units-table {
+    font-size: 0.875rem;
+}
+
+.units-table th {
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.75rem;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.units-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.units-table tr:hover {
+    background: #f8f9fa;
+}
+
+.rental-cell {
+    color: #0d6efd;
+    font-weight: 700;
+}
+
+.badge-text {
+    font-size: 0.8125rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+.no-units {
+    margin-top: 1.5rem;
+    text-align: center;
+    padding: 2rem;
+}
+
+.no-units-text {
+    margin: 0;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* ============================================
+   PLOT CARD
+   ============================================ */
+.plot-card {
+    margin-bottom: 1.5rem;
+}
+
+.plot-summary {
+    margin-top: 1.5rem;
+}
+
+.summary-card {
+    border: 1px solid #dee2e6;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9375rem;
+}
+
+.summary-item label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.summary-item span {
+    color: #212529;
+    font-weight: 600;
+}
+
+.plot-id-value {
+    margin: 0;
+    font-size: 1.125rem;
+    color: #212529;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+/* ============================================
+   BUILDINGS CONTAINER
+   ============================================ */
+.buildings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: #495057;
+    font-weight: 600;
+}
+
+.section-header i {
+    color: #6c757d;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #adb5bd;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 0.9375rem;
+}
+
+.building-item {
+    margin-bottom: 1rem;
+}
+
+.building-card {
+    border: 1px solid #dee2e6;
+}
+
+.building-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.building-title span {
+    font-size: 1rem;
+    color: #212529;
+    font-weight: 600;
+}
+
+.building-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.info-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9375rem;
+}
+
+.info-field label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.info-field span {
+    color: #212529;
+    font-weight: 600;
+}
+
+/* ============================================
+   UNITS SECTION
+   ============================================ */
+.units-section {
+    margin-top: 0.5rem;
+}
+
+.units-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.units-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    color: #495057;
+    font-weight: 600;
+}
+
+.units-title i {
+    color: #6c757d;
+}
+
+.unit-item {
+    margin-bottom: 0.5rem;
+}
+
+.unit-panel {
+    border: 1px solid #e9ecef;
+}
+
+.unit-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.unit-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+.unit-field label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.unit-field span {
+    color: #212529;
+    font-weight: 600;
+}
+
+.rental-value {
+    color: #0d6efd;
+    font-weight: 700;
+}
+
+.no-units {
+    margin-top: 0.5rem;
+}
+
+.no-units-text {
+    margin: 0;
+    text-align: center;
+    color: #adb5bd;
+    font-size: 0.875rem;
+    font-style: italic;
+    padding: 0.5rem;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+    .legend-overlay {
+        width: 200px;
+        top: 10px;
+        left: 10px;
+    }
+
+    .legend-header {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .legend-header h4 {
+        font-size: 0.9375rem;
+    }
+
+    .legend-content {
+        padding: 0.75rem;
+    }
+
+    .legend-row {
+        font-size: 0.8125rem;
+    }
+
+    .dialog-body {
+        max-height: 60vh;
+    }
+
+    .building-details-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .building-id-section h3 {
+        font-size: 1.25rem;
+    }
+
+    .units-table {
+        font-size: 0.8125rem;
+    }
+
+    .units-table th,
+    .units-table td {
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .legend-overlay {
+        width: 180px;
+        top: 8px;
+        left: 8px;
+    }
+
+    .legend-header {
+        padding: 0.5rem;
+    }
+
+    .legend-header h4 {
+        font-size: 0.875rem;
+    }
+
+    .legend-content {
+        padding: 0.5rem;
+    }
+
+    .sidebar-header h3 {
+        font-size: 1.125rem;
+    }
+
+    .plot-id-value {
+        font-size: 1rem;
+    }
+
+    .building-title span {
+        font-size: 0.9375rem;
+    }
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+.sidebar-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-body::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+.sidebar-body::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 3px;
+}
+
+.sidebar-body::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+}

@@ -85,6 +85,13 @@ export class BuildingDataService {
         );
     }
 
+
+
+  verifyToken(plotId: string) {
+    return this.http.get(`${this.apiUrl}/pts/validate-public?token=${plotId}`);
+  }
+
+
     assignBuildingToPlot(buildingId, plotId) {
         return this.http.patch(
             `${this.apiUrl}/building-plots/plot-assign/${buildingId}/${plotId}`,

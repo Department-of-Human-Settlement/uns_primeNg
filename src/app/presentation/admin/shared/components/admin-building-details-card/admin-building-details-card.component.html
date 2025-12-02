@@ -19,6 +19,12 @@
         </div>
     </ng-template>
 
+    <div class="p-0 mb-2">
+        <p style="margin: 0; padding: 0">Construction Approval Details</p>
+        <p style="margin: 0; padding: 0">
+            Construction Application ID: {{ casId || "NA" }}
+        </p>
+    </div>
     <p *ngIf="buildingDetails.buildingName">
         <strong>Building Name:</strong>
         {{ buildingDetails.buildingName }}

@@ -34,6 +34,8 @@ export class AdminBuildingDetailsCardComponent implements OnChanges {
     parseBuildingFloorLabel = PARSEBUILDINGFLOORS;
     ref: DynamicDialogRef | undefined;
 
+    casId?: string;
+
     constructor(
         private buildingDetailDataService: BuildingDetailDataService,
         private dialogService: DialogService
@@ -77,6 +79,7 @@ export class AdminBuildingDetailsCardComponent implements OnChanges {
                 console.log(res);
                 this.getBuildingDetails();
             }
+            this.casId = res.casId;
         });
     }
 }
